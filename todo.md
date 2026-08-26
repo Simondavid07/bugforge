@@ -62,3 +62,10 @@
 - [x] Repair the desktop application frame so page content no longer overlaps or sits beneath the fixed sidebar and header.
 - [x] Ensure correspondence-route decoration is clipped to the content pane and cannot bleed into the navigation chrome.
 - [x] Verify the repaired frame at the supplied wide viewport and on mobile, then checkpoint the layout fix.
+- [x] Design and implement a high-contrast dark BugForge edition with its own paper, ink, rule, accent, and accessible text treatments.
+- [x] Add a polished theme-transition treatment and dark-aware cursor, card, control, and correspondence-surface styling.
+- [x] Add restrained ambient motion, richer action feedback, and gentle emphasis effects while preserving reduced-motion support.
+- [x] Verify light and dark editions at desktop and mobile widths, run regression tests, and checkpoint the enhancement.
+- [x] Force and visually inspect the dark edition at desktop and mobile sizes for contrast, readability, and layout stability.
+- [x] Save and deliver the post-verification dark-theme and motion checkpoint.
+- [x] Correct dark-edition analytics and pastel-card contrast, then restore the light default with persisted user-selected theme preference.
