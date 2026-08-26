@@ -90,11 +90,11 @@
 - [x] Add one end-to-end saved-search regression test spanning preference save, retrieval, and issue-filter path construction.
 - [x] Diagnose and fix project accent updates so authorized project admins can apply and see the selected color.
 - [x] Verify the current GitHub repository linkage and database provider status, then document any required connection step.
-- [ ] Validate the corrected accent flow and integration status, checkpoint the changes, and report the outcome.
+- [x] Validate the corrected accent flow and integration status, checkpoint the changes, and report the outcome.
 - [x] Reproduce the accent path with an authorized active project and confirm the selected accent persists into workspace data and visible styling.
 - [x] Add focused coverage for active-project accent persistence and server authorization behavior.
 - [x] Document the verified GitHub remote status and current managed-MySQL versus Supabase connection requirements.
-- [ ] Re-run validation, checkpoint the corrected investigation, and report the required user action for GitHub or Supabase if desired.
+- [x] Re-run validation, checkpoint the corrected investigation, and report the required user action for GitHub or Supabase if desired.
 - [x] Complete live browser verification of project-accent selection after an authorized workspace and active project exist.
 - [x] Create a private GitHub repository for BugForge and push the current code without replacing the managed project remote.
 - [x] Create the default BugForge workspace and its initial project as the authenticated administrator.
@@ -105,5 +105,18 @@
 - [x] Verify the user-completed live accent selection and refreshed sage workspace state.
 - [x] Run the complete type and test suite after final configuration changes.
 - [x] Push the final checkpoint-ready code and documentation to the private GitHub remote.
-- [ ] Save and deliver the final repository and integration checkpoint.
+- [x] Save and deliver the final repository and integration checkpoint.
 - [x] Add a component-level test covering refreshed project accent data applying the visible workspace CSS accent variable.
+- [x] Audit the managed runtime database and enabled Supabase project for a safe, explicit integration boundary without risking production data.
+- [x] Harden production configuration, health guidance, and deployment documentation for the current managed full-stack runtime.
+- [x] Run full build, type, test, visual, and runtime validation for production readiness.
+- [ ] Synchronize all production-readiness updates to the private GitHub repository.
+- [ ] Save and deliver the production-ready checkpoint with clear publishing instructions.
+- [x] Apply route-level code splitting to reduce the initial production JavaScript bundle and re-run the production build audit.
+- [x] Serve the built production artifact and smoke-test core authenticated routes in the production runtime.
+- [x] Re-run desktop and mobile visual review after bundle optimization and document the results.
+- [x] Complete the remaining production-hardening evidence and verified release checklist.
+- [ ] Smoke-test authenticated workspace and Issue Explorer routes against the built production server.
+- [ ] Document the remaining shared vendor-chunk warning and its acceptable performance rationale.
+- [ ] Synchronize the latest production optimization and readiness documentation to the private GitHub repository.
+- [ ] Save and deliver the verified production-ready checkpoint.
