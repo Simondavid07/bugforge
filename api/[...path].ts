@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { restoreVercelApiPath } from "../server/_core/vercelRoute";
+import { restoreVercelApiPath } from "../server/_core/vercelRoute.js";
 
 // Vercel discovers this catch-all file as a Node serverless function. The
 // Express app is shared with the managed runtime, but never calls listen() here.
-let appPromise: Promise<ReturnType<typeof import("../server/_core/app")["createBugForgeApp"]>> | undefined;
+let appPromise: Promise<ReturnType<typeof import("../server/_core/app.js")["createBugForgeApp"]>> | undefined;
 
 function getApp() {
-  appPromise ??= import("../server/_core/app").then(({ createBugForgeApp }) =>
+  appPromise ??= import("../server/_core/app.js").then(({ createBugForgeApp }) =>
     createBugForgeApp(),
   );
   return appPromise;
