@@ -111,7 +111,7 @@
 - [x] Harden production configuration, health guidance, and deployment documentation for the current managed full-stack runtime.
 - [x] Run full build, type, test, visual, and runtime validation for production readiness.
 - [x] Synchronize all production-readiness updates to the private GitHub repository.
-- [ ] Save and deliver the production-ready checkpoint with clear publishing instructions.
+- [x] Save and deliver the production-ready checkpoint with clear publishing instructions.
 - [x] Apply route-level code splitting to reduce the initial production JavaScript bundle and re-run the production build audit.
 - [x] Serve the built production artifact and smoke-test core authenticated routes in the production runtime.
 - [x] Re-run desktop and mobile visual review after bundle optimization and document the results.
@@ -119,5 +119,8 @@
 - [x] Smoke-test authenticated workspace and Issue Explorer routes against the built production server.
 - [x] Document the remaining shared vendor-chunk warning and its acceptable performance rationale.
 - [x] Synchronize the latest production optimization and readiness documentation to the private GitHub repository.
-- [ ] Save and deliver the verified production-ready checkpoint.
+- [x] Save and deliver the verified production-ready checkpoint.
 - [x] Verify the built production workspace shell and Issue Explorer in an authenticated browser session after navigation and refresh.
+- [x] Obtain the dedicated Supabase project creation cost and user confirmation required before provisioning.
+- [x] Create an isolated Supabase project for BugForge without modifying the existing Lock Note project.
+- [x] Document the dedicated project identifier, safe migration boundary, and remaining runtime integration steps.

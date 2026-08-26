@@ -21,9 +21,9 @@ This warning is accepted for the current release because all routes and controls
 
 ## Database and Supabase boundary
 
-The live runtime is intentionally kept on its managed MySQL/TiDB database. The enabled Supabase project, `clonefest-2`, contains pre-existing Lock Note tables (`pastes`, `drafts`, `events`, `profiles`, `vault_contacts`, and `paste_replies`) and therefore is **not** a safe database target for BugForge.
+The live runtime is intentionally kept on its managed MySQL/TiDB database. A dedicated Supabase project named **BugForge** is now active in `ap-south-1` (ref `zznvjtdspjampmztrunx`) with an empty isolated public schema. The existing `clonefest-2` project still contains Lock Note tables (`pastes`, `drafts`, `events`, `profiles`, `vault_contacts`, and `paste_replies`) and remains untouched.
 
-> A safe Supabase adoption requires a **new dedicated Supabase project**, a planned MySQL-to-Postgres schema and data migration, fresh runtime credentials, storage/auth decisions, and post-migration validation. It has not been applied to avoid affecting the existing Lock Note data or the working BugForge database.
+> A safe Supabase adoption now has an isolated target, but still requires a planned MySQL-to-Postgres schema and data migration, a Drizzle Postgres-driver conversion, fresh runtime credentials, storage/auth decisions, and post-migration validation. It has not been applied to avoid disrupting the working BugForge runtime database.
 
 ## Publish
 
