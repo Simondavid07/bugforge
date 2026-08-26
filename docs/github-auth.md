@@ -56,3 +56,11 @@ For local development, add the local callback URL to Supabase Auth’s redirect 
 [2]: https://supabase.com/docs/reference/javascript/auth-signinwithoauth "Supabase JavaScript: signInWithOAuth"
 
 Deployment note: the production commit is authored with the GitHub account canonical noreply email so Vercel can match the commit author.
+
+## Automated regression coverage
+
+Playwright coverage lives in `tests/e2e/github-auth.spec.ts`. The anonymous test verifies that signed-out visitors see **Continue with GitHub**. Authenticated tests verify the GitHub identity, the protected `workspace.mine` contract, the existing `WEB` project, and the Workspace settings deletion affordance.
+
+To create a local authenticated state, run `PLAYWRIGHT_BASE_URL=https://bugforge-lyart.vercel.app pnpm e2e:auth:setup`, complete GitHub sign-in in the opened browser, and press Enter in the terminal. The resulting `playwright/.auth/github.json` file is ignored by Git and must never be committed. Run the suite with `PLAYWRIGHT_AUTH_STATE=playwright/.auth/github.json pnpm e2e`; run the signed-out smoke test independently with `pnpm e2e --grep signed-out`. CI should provide `PLAYWRIGHT_AUTH_STATE` through a protected secret or pre-generated private artifact rather than attempting to store OAuth credentials in the repository.
+
+The production workspace deletion feature is available at **Personalize → Workspace settings**. Only workspace admins see the Delete action, the exact workspace name is required, and the server performs dependent-record cleanup in one transaction. The UI intentionally does not auto-submit deletion from automated tests; destructive production deletion should be performed by an authorized administrator after reviewing the confirmation text.
