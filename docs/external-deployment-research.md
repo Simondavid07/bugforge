@@ -9,6 +9,7 @@
 | Supabase public tables | Enable RLS on every BugForge public-schema table. The app maintains server-side Manus OAuth/tRPC authorization, so no browser Data API policies were created; this is an intentional default-deny posture. | [Supabase security guidance](https://supabase.com/docs/guides/api/securing-your-api) |
 | Vite SPA routing | Build static Vite output for Vercel and use a final SPA rewrite to `index.html`, while excluding API-function paths from the fallback. | [Vercel: Vite on Vercel](https://vercel.com/docs/frameworks/frontend/vite) |
 | Vercel serverless backend | Export an Express handler from `api/[...path].ts`; never start a long-lived listener in a Vercel function. | [Vercel: Using Express.js with Vercel](https://vercel.com/kb/guide/using-express-with-vercel) and [Vercel Functions](https://vercel.com/docs/functions) |
+| Vercel Node API runtime | Node functions in the root `/api` directory are automatically detected; do **not** set a `runtime` override for an official Node function. The `functions.runtime` setting is for a versioned community runtime package. | [Vercel: Configuring function runtime](https://vercel.com/docs/functions/configuring-functions/runtime) and [Vercel: Node.js runtime](https://vercel.com/docs/functions/runtimes/node-js) |
 | Internal routing | Rewrite legacy `/manus-storage/*` URLs into the Express serverless function and preserve `/api/*` for tRPC and OAuth. | [Vercel rewrites](https://vercel.com/docs/routing/rewrites) |
 
 ## Review notes
