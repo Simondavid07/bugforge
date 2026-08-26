@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useCorrespondenceSurface } from "@/hooks/useCorrespondenceSurface";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,7 +17,7 @@ const allowedTypes = ["image/png", "image/jpeg", "image/webp", "text/plain", "ap
 type LinkType = "relates_to" | "duplicates" | "blocked_by" | "blocks";
 const panel = "rounded-[24px] border border-white/10 bg-white/[.045] shadow-[0_18px_52px_rgba(0,0,0,.2)]";
 
-export default function IssueDetail() {
+export default function IssueDetail() { useCorrespondenceSurface("issue-desk");
   const [, params] = useRoute("/issues/:id"); const issueId = Number(params?.id); const [, setLocation] = useLocation(); const { user } = useAuth(); const utils = trpc.useUtils();
   const detail = trpc.issues.get.useQuery({ issueId }, { enabled: Number.isFinite(issueId) && issueId > 0 });
   const refresh = () => Promise.all([utils.issues.get.invalidate({ issueId }), utils.issues.list.invalidate(), utils.project.overview.invalidate()]);

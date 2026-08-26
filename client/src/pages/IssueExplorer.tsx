@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { useCorrespondenceSurface } from "@/hooks/useCorrespondenceSurface";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,7 @@ import { Filter, Plus, Search } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { useLocation } from "wouter";
 
-export default function IssueExplorer() {
+export default function IssueExplorer() { useCorrespondenceSurface("issues");
   const { projectId, activeProject } = useActiveProject();
   const [, setLocation] = useLocation();
   const [query, setQuery] = useState("");

@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useCorrespondenceSurface } from "@/hooks/useCorrespondenceSurface";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { statusMeta } from "@/lib/bugforge";
 import { trpc } from "@/lib/trpc";
@@ -7,7 +8,7 @@ import { useLocation } from "wouter";
 
 const lanes = ["intake", "triage", "in_progress", "verify", "done"] as const;
 
-export default function Boards() {
+export default function Boards() { useCorrespondenceSurface("workboard");
   const { user } = useAuth();
   const { projectId, activeProject } = useActiveProject();
   const issuesQuery = trpc.issues.board.useQuery({ projectId: projectId ?? 0 }, { enabled: Boolean(projectId) });

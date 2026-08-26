@@ -45,3 +45,17 @@
 - [x] Validate desktop/mobile composition and motion behavior, then checkpoint the interaction-quality upgrade.
 - [x] Directly tighten the shell header, main content frame, mobile spacing, and core-screen container alignment based on the visual review.
 - [x] Save and deliver the post-interaction-quality checkpoint after the final alignment verification.
+- [x] Replace the clean-playful palette with a warm private-correspondence system inspired by the Lock Note brief: paper, ink, terracotta, rose, sage, dusty gold, and restrained rules.
+- [x] Refine BugForge typography and component surfaces around editorial serif display type, quiet sans-serif interface text, small uppercase security-style metadata, paper texture, and letter-like details.
+- [x] Rework onboarding, explorer, workboard, analytics, notification, and issue-detail surfaces so the visual language is cohesive but remains specific to issue tracking.
+- [x] Retune motion toward slow paper-slide, soft fade, and subtle seal-like emphasis while maintaining custom cursor accessibility and reduced-motion support.
+- [x] Verify desktop/mobile fidelity, validate workflows, and checkpoint the Lock Note-inspired BugForge refinement.
+- [x] Directly apply the Lock Note-inspired editorial surface treatment in core page components rather than relying solely on global palette remapping.
+- [x] Apply the seal-breathe motion to an actual trust or action element while preserving reduced-motion behavior.
+- [x] Save and deliver a new checkpoint after verifying the completed Lock Note-inspired refinement.
+- [x] Directly update each core page component with a correspondence-page marker so paper, letter, and seal details are explicitly part of its own rendered surface.
+- [x] Save and deliver the checkpoint after the component-level correspondence rollout is visually verified.
+- [x] Add a correspondence surface marker directly inside Home, Issue Explorer, Workboard, Insights, Inbox, and Issue Desk components.
+- [x] Save and deliver a final checkpoint after the explicit per-page correspondence marker rollout is verified.
+- [x] Add the missing Insights and Inbox correspondence marker calls and verify all six core pages register their own correspondence surface.
+- [x] Save and deliver the final Lock Note-inspired BugForge checkpoint after full route verification.
