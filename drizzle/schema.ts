@@ -7,6 +7,8 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  avatarKey: varchar("avatarKey", { length: 500 }),
+  avatarUrl: varchar("avatarUrl", { length: 750 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -39,6 +41,8 @@ export const projects = mysqlTable("projects", {
   key: varchar("key", { length: 12 }).notNull(),
   description: longtext("description"),
   accentColor: varchar("accentColor", { length: 7 }).notNull().default("#A55343"),
+  logoKey: varchar("logoKey", { length: 500 }),
+  logoUrl: varchar("logoUrl", { length: 750 }),
   workflow: json("workflow").$type<string[]>().notNull(),
   createdById: int("createdById").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -194,6 +198,15 @@ export const savedViews = mysqlTable("savedViews", {
   uniqueIndex("saved_view_owner_name_unique").on(table.projectId, table.ownerId, table.name),
   index("saved_view_project_idx").on(table.projectId),
 ]);
+
+export const userPreferences = mysqlTable("userPreferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  sidebarOrder: json("sidebarOrder").$type<string[]>().notNull(),
+  projectOrder: json("projectOrder").$type<number[]>().notNull(),
+  savedSearches: json("savedSearches").$type<Array<{ id: string; name: string; query: string; status?: string; severity?: string }>>().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => [uniqueIndex("user_preferences_user_unique").on(table.userId)]);
 
 export const notifications = mysqlTable("notifications", {
   id: int("id").autoincrement().primaryKey(),

@@ -74,3 +74,17 @@
 - [x] Add an accessible Cmd/Ctrl+K command palette for quick route, project, and issue navigation.
 - [x] Add a persisted user motion-intensity setting that controls decorative and interaction animation without overriding reduced-motion safeguards.
 - [x] Add tests, verify desktop/mobile states, and checkpoint the navigation and personalization upgrade.
+- [x] Add secure image upload and persisted metadata for project logos and user avatars, with validated type, size, and authorization controls.
+- [x] Add accessible drag-and-drop ordering for sidebar navigation and project ordering, persisted per user for a customizable workflow.
+- [x] Add saved command searches and quick issue filters to Cmd/Ctrl+K, including clear empty and keyboard states.
+- [x] Make Tune feel easy to discover, explain the still/soft/expressive options, and verify its preference behavior is visible and functional.
+- [x] Test all personalization paths, visually review desktop/mobile layouts, and checkpoint the completed suite.
+- [x] Add keyboard-accessible move-up and move-down controls plus live reorder feedback for sidebar and project ordering.
+- [x] Apply the persisted project order to command-palette project navigation as well as the personalization panel.
+- [x] Add focused tests for personalization preference persistence, upload validation/authorization, and saved-search behavior.
+- [x] Save and deliver the post-validation personalization checkpoint.
+- [x] Add explicit accessible Move up and Move down controls for sidebar and project ordering, with live feedback and disabled edge states.
+- [x] Add focused saved-search behavior coverage for persisted retrieval and issue-filter path construction.
+- [ ] Save and deliver the final accessibility-complete personalization checkpoint.
+- [x] Add an integration-style saved-search test covering preference persistence, retrieval, and issue-filter navigation.
+- [x] Add one end-to-end saved-search regression test spanning preference save, retrieval, and issue-filter path construction.

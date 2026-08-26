@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { aiRecommendations, attachments, comments, components, issueLabels, issueLinks, issueWatchers, issues, labels, milestones, notifications, projectMembers, projects, savedViews, users, workspaceMembers, workspaces } from "../drizzle/schema";
+import { aiRecommendations, attachments, comments, components, issueLabels, issueLinks, issueWatchers, issues, labels, milestones, notifications, projectMembers, projects, savedViews, userPreferences, users, workspaceMembers, workspaces } from "../drizzle/schema";
 import {
   countProjectStats,
   createWorkspaceWithProject,
@@ -284,6 +284,37 @@ export const appRouter = router({
       await access(ctx.user.id, input.projectId);
       await db.insert(savedViews).values({ projectId: input.projectId, ownerId: ctx.user.id, name: input.name, filters: input.filters }).onDuplicateKeyUpdate({ set: { filters: input.filters } });
       return { success: true };
+    }),
+  }),
+
+  personalization: router({
+    get: protectedProcedure.query(async ({ ctx }) => {
+      const db = await requireDb();
+      const existing = (await db.select().from(userPreferences).where(eq(userPreferences.userId, ctx.user.id)).limit(1))[0];
+      const user = (await db.select({ avatarUrl: users.avatarUrl }).from(users).where(eq(users.id, ctx.user.id)).limit(1))[0];
+      return { ...(existing ?? { sidebarOrder: ["/", "/issues", "/boards", "/analytics", "/notifications"], projectOrder: [], savedSearches: [] }), avatarUrl: user?.avatarUrl ?? null };
+    }),
+    updatePreferences: protectedProcedure.input(z.object({ sidebarOrder: z.array(z.enum(["/", "/issues", "/boards", "/analytics", "/notifications"])).length(5), projectOrder: z.array(z.number().int().positive()).max(100), savedSearches: z.array(z.object({ id: z.string().min(1).max(80), name: z.string().trim().min(2).max(80), query: z.string().trim().max(100), status: z.enum(issueEnums.status).optional(), severity: z.enum(issueEnums.severity).optional() })).max(20) })).mutation(async ({ ctx, input }) => {
+      const db = await requireDb();
+      const sidebarOrder = Array.from(new Set(input.sidebarOrder));
+      if (sidebarOrder.length !== 5) throw new TRPCError({ code: "BAD_REQUEST", message: "Sidebar order must contain each workspace view once." });
+      await db.insert(userPreferences).values({ userId: ctx.user.id, ...input, sidebarOrder }).onDuplicateKeyUpdate({ set: { ...input, sidebarOrder } });
+      return { success: true, ...input, sidebarOrder };
+    }),
+    uploadImage: protectedProcedure.input(z.object({ target: z.enum(["avatar", "project_logo"]), projectId: z.number().int().positive().optional(), fileName: z.string().trim().min(1).max(255), contentType: z.enum(["image/png", "image/jpeg", "image/webp"]), dataUrl: z.string().min(1).max(3_000_000) })).mutation(async ({ ctx, input }) => {
+      const db = await requireDb();
+      if (input.target === "project_logo" && !input.projectId) throw new TRPCError({ code: "BAD_REQUEST", message: "Choose a project for its logo." });
+      if (input.target === "project_logo") await access(ctx.user.id, input.projectId!, "admin");
+      const match = input.dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+      if (!match || match[1] !== input.contentType) throw new TRPCError({ code: "BAD_REQUEST", message: "The image data does not match its declared type." });
+      const bytes = Buffer.from(match[2], "base64");
+      if (!bytes.length || bytes.length > 2 * 1024 * 1024) throw new TRPCError({ code: "PAYLOAD_TOO_LARGE", message: "Images must be 2 MB or smaller." });
+      const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]+/g, "-");
+      const key = input.target === "avatar" ? `bugforge/user-${ctx.user.id}/avatar/${Date.now()}-${safeName}` : `bugforge/project-${input.projectId}/branding/${Date.now()}-${safeName}`;
+      const stored = await storagePut(key, bytes, input.contentType);
+      if (input.target === "avatar") await db.update(users).set({ avatarKey: stored.key, avatarUrl: stored.url }).where(eq(users.id, ctx.user.id));
+      else await db.update(projects).set({ logoKey: stored.key, logoUrl: stored.url }).where(eq(projects.id, input.projectId!));
+      return { success: true, key: stored.key, url: stored.url };
     }),
   }),
 
