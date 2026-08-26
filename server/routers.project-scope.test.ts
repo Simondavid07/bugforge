@@ -44,12 +44,12 @@ describe("BugForge project-scoped procedures", () => {
   });
 
   it("requires an administrative project role before managing project members", async () => {
-    const onDuplicateKeyUpdate = vi.fn(async () => undefined);
-    mocks.db = { insert: vi.fn(() => ({ values: vi.fn(() => ({ onDuplicateKeyUpdate })) })) };
+    const onConflictDoUpdate = vi.fn(async () => undefined);
+    mocks.db = { insert: vi.fn(() => ({ values: vi.fn(() => ({ onConflictDoUpdate })) })) };
     const caller = appRouter.createCaller(authenticatedContext());
     await expect(caller.project.addMember({ projectId: 41, userId: 12, role: "viewer" })).resolves.toEqual({ success: true });
     expect(mocks.requireProjectRole).toHaveBeenCalledWith(9, 41, "admin");
-    expect(onDuplicateKeyUpdate).toHaveBeenCalledOnce();
+    expect(onConflictDoUpdate).toHaveBeenCalledOnce();
   });
 
   it("requires an admin and normalizes a project accent color before saving", async () => {
@@ -81,11 +81,11 @@ describe("BugForge project-scoped procedures", () => {
   });
 
   it("persists a complete personalization preference set for the signed-in user", async () => {
-    const onDuplicateKeyUpdate = vi.fn(async () => undefined);
-    mocks.db = { insert: vi.fn(() => ({ values: vi.fn(() => ({ onDuplicateKeyUpdate })) })) };
+    const onConflictDoUpdate = vi.fn(async () => undefined);
+    mocks.db = { insert: vi.fn(() => ({ values: vi.fn(() => ({ onConflictDoUpdate })) })) };
     const caller = appRouter.createCaller(authenticatedContext());
     await expect(caller.personalization.updatePreferences({ sidebarOrder: ["/", "/issues", "/boards", "/analytics", "/notifications"], projectOrder: [41, 12], savedSearches: [{ id: "critical", name: "Critical work", query: "auth", severity: "critical" }] })).resolves.toMatchObject({ success: true });
-    expect(onDuplicateKeyUpdate).toHaveBeenCalledOnce();
+    expect(onConflictDoUpdate).toHaveBeenCalledOnce();
   });
 
   it("returns persisted saved searches with their structured filters for command navigation", async () => {
@@ -106,8 +106,8 @@ describe("BugForge project-scoped procedures", () => {
 
   it("carries a saved search from preference save through retrieval into issue-filter navigation", async () => {
     let stored: { sidebarOrder: string[]; projectOrder: number[]; savedSearches: Array<{ id: string; name: string; query: string; status?: "intake" | "triage" | "in_progress" | "verify" | "done"; severity?: "blocker" | "critical" | "major" | "minor" | "trivial" }> } | undefined;
-    const onDuplicateKeyUpdate = vi.fn(async (update: { set: typeof stored }) => { stored = update.set!; });
-    mocks.db = { insert: vi.fn(() => ({ values: vi.fn(() => ({ onDuplicateKeyUpdate })) })) };
+    const onConflictDoUpdate = vi.fn(async (update: { set: typeof stored }) => { stored = update.set!; });
+    mocks.db = { insert: vi.fn(() => ({ values: vi.fn(() => ({ onConflictDoUpdate })) })) };
     const caller = appRouter.createCaller(authenticatedContext());
     await caller.personalization.updatePreferences({ sidebarOrder: ["/", "/issues", "/boards", "/analytics", "/notifications"], projectOrder: [41], savedSearches: [{ id: "release-risk", name: "Release risks", query: "checkout", status: "triage", severity: "critical" }] });
     const preferenceLimit = vi.fn(async () => [stored]);

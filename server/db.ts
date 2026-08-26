@@ -1,5 +1,6 @@
-import { and, desc, eq, inArray, max, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { and, desc, eq, inArray, max } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import {
   aiRecommendations,
   attachments,
@@ -21,9 +22,11 @@ import {
   workspaceMembers,
   workspaces,
 } from "../drizzle/schema";
+import * as schema from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
-let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: Pool | null = null;
+let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 export type ProjectRole = "viewer" | "reporter" | "member" | "triage" | "admin";
 export type WorkspaceRole = "admin" | "member" | "viewer";
@@ -50,11 +53,20 @@ export function normalizeSlug(value: string) {
 }
 
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  const connectionString = process.env.SUPABASE_DATABASE_URL;
+  if (!_db && connectionString) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _pool = new Pool({
+        connectionString,
+        ssl: { rejectUnauthorized: false },
+        max: process.env.VERCEL ? 1 : 5,
+        idleTimeoutMillis: 10_000,
+        connectionTimeoutMillis: 10_000,
+      });
+      _db = drizzle(_pool, { schema });
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.warn("[Database] Failed to initialize Supabase PostgreSQL:", error);
+      _pool = null;
       _db = null;
     }
   }
@@ -63,7 +75,7 @@ export async function getDb() {
 
 export async function requireDb() {
   const db = await getDb();
-  if (!db) throw new Error("Database unavailable");
+  if (!db) throw new Error("Dedicated Supabase PostgreSQL database unavailable");
   return db;
 }
 
@@ -82,7 +94,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
   values.role = user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user");
   updateSet.role = values.role;
-  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+  await db.insert(users).values(values).onConflictDoUpdate({ target: users.openId, set: updateSet });
 }
 
 export async function getUserByOpenId(openId: string) {
@@ -92,10 +104,9 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
-function insertId(result: unknown) {
-  const row = (result as Array<{ insertId?: number }>)[0];
-  if (!row?.insertId) throw new Error("Database insert did not return an identifier");
-  return Number(row.insertId);
+function requiredId(row: { id: number } | undefined, operation: string) {
+  if (!row?.id) throw new Error(`${operation} did not return an identifier`);
+  return row.id;
 }
 
 export async function createWorkspaceWithProject(input: {
@@ -107,22 +118,22 @@ export async function createWorkspaceWithProject(input: {
   const db = await requireDb();
   const baseSlug = normalizeSlug(input.workspaceName);
   const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
-  const workspaceResult = await db.insert(workspaces).values({
+  const [workspace] = await db.insert(workspaces).values({
     name: input.workspaceName.trim(),
     slug,
     createdById: input.userId,
-  });
-  const workspaceId = insertId(workspaceResult);
+  }).returning({ id: workspaces.id });
+  const workspaceId = requiredId(workspace, "Workspace creation");
   await db.insert(workspaceMembers).values({ workspaceId, userId: input.userId, role: "admin" });
 
-  const projectResult = await db.insert(projects).values({
+  const [project] = await db.insert(projects).values({
     workspaceId,
     name: input.projectName.trim(),
     key: input.projectKey.trim().toUpperCase(),
     workflow: ["intake", "triage", "in_progress", "verify", "done"],
     createdById: input.userId,
-  });
-  const projectId = insertId(projectResult);
+  }).returning({ id: projects.id });
+  const projectId = requiredId(project, "Project creation");
   await db.insert(projectMembers).values({ projectId, userId: input.userId, role: "admin" });
   return { workspaceId, projectId, slug };
 }

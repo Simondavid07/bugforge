@@ -134,7 +134,7 @@ export const appRouter = router({
     addMember: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), userId: z.number().int().positive(), role: z.enum(["viewer", "reporter", "member", "triage", "admin"]) })).mutation(async ({ ctx, input }) => {
       const db = await requireDb();
       await access(ctx.user.id, input.projectId, "admin");
-      await db.insert(projectMembers).values({ projectId: input.projectId, userId: input.userId, role: input.role }).onDuplicateKeyUpdate({ set: { role: input.role } });
+      await db.insert(projectMembers).values({ projectId: input.projectId, userId: input.userId, role: input.role }).onConflictDoUpdate({ target: [projectMembers.projectId, projectMembers.userId], set: { role: input.role } });
       return { success: true };
     }),
     updateWorkflow: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), workflow: z.array(z.enum(issueEnums.status)).min(3).max(5) })).mutation(async ({ ctx, input }) => {
@@ -190,7 +190,7 @@ export const appRouter = router({
       const db = await requireDb();
       await access(ctx.user.id, input.projectId, "reporter");
       const number = await getNextIssueNumber(input.projectId);
-      const result = await db.insert(issues).values({
+      const [createdIssue] = await db.insert(issues).values({
         projectId: input.projectId,
         number,
         title: input.title,
@@ -205,8 +205,9 @@ export const appRouter = router({
         milestoneId: input.milestoneId ?? null,
         reporterId: ctx.user.id,
         isReleaseBlocker: input.isReleaseBlocker,
-      });
-      const issueId = Number((result as unknown as Array<{ insertId: number }>)[0].insertId);
+      }).returning({ id: issues.id });
+      if (!createdIssue) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Issue creation did not return an identifier." });
+      const issueId = createdIssue.id;
       if (input.labelIds.length) await db.insert(issueLabels).values(input.labelIds.map(labelId => ({ issueId, labelId })));
       await recordActivity({ issueId, actorId: ctx.user.id, type: "issue.created", message: `Created ${number}: ${input.title}` });
       return { issueId, number };
@@ -267,7 +268,7 @@ export const appRouter = router({
       const linked = (await db.select().from(issues).where(and(eq(issues.projectId, issue.projectId), eq(issues.number, input.linkedIssueNumber))).limit(1))[0];
       if (!linked) throw new TRPCError({ code: "NOT_FOUND", message: "No issue with that number exists in this project." });
       if (linked.id === issue.id) throw new TRPCError({ code: "BAD_REQUEST", message: "An issue cannot link to itself." });
-      await db.insert(issueLinks).values({ issueId: input.issueId, linkedIssueId: linked.id, type: input.type, createdById: ctx.user.id }).onDuplicateKeyUpdate({ set: { type: input.type } });
+      await db.insert(issueLinks).values({ issueId: input.issueId, linkedIssueId: linked.id, type: input.type, createdById: ctx.user.id }).onConflictDoUpdate({ target: [issueLinks.issueId, issueLinks.linkedIssueId, issueLinks.type], set: { type: input.type } });
       await recordActivity({ issueId: input.issueId, actorId: ctx.user.id, type: "issue.linked", message: `Linked issue #${linked.number} as ${input.type}` });
       return { success: true };
     }),
@@ -282,7 +283,7 @@ export const appRouter = router({
     save: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), name: z.string().trim().min(2).max(80), filters: z.record(z.string(), z.unknown()) })).mutation(async ({ ctx, input }) => {
       const db = await requireDb();
       await access(ctx.user.id, input.projectId);
-      await db.insert(savedViews).values({ projectId: input.projectId, ownerId: ctx.user.id, name: input.name, filters: input.filters }).onDuplicateKeyUpdate({ set: { filters: input.filters } });
+      await db.insert(savedViews).values({ projectId: input.projectId, ownerId: ctx.user.id, name: input.name, filters: input.filters }).onConflictDoUpdate({ target: [savedViews.projectId, savedViews.ownerId, savedViews.name], set: { filters: input.filters } });
       return { success: true };
     }),
   }),
@@ -298,7 +299,7 @@ export const appRouter = router({
       const db = await requireDb();
       const sidebarOrder = Array.from(new Set(input.sidebarOrder));
       if (sidebarOrder.length !== 5) throw new TRPCError({ code: "BAD_REQUEST", message: "Sidebar order must contain each workspace view once." });
-      await db.insert(userPreferences).values({ userId: ctx.user.id, ...input, sidebarOrder }).onDuplicateKeyUpdate({ set: { ...input, sidebarOrder } });
+      await db.insert(userPreferences).values({ userId: ctx.user.id, ...input, sidebarOrder }).onConflictDoUpdate({ target: userPreferences.userId, set: { ...input, sidebarOrder } });
       return { success: true, ...input, sidebarOrder };
     }),
     uploadImage: protectedProcedure.input(z.object({ target: z.enum(["avatar", "project_logo"]), projectId: z.number().int().positive().optional(), fileName: z.string().trim().min(1).max(255), contentType: z.enum(["image/png", "image/jpeg", "image/webp"]), dataUrl: z.string().min(1).max(3_000_000) })).mutation(async ({ ctx, input }) => {
@@ -346,8 +347,9 @@ export const appRouter = router({
       const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]+/g, "-");
       const objectKey = `bugforge/project-${issue.projectId}/issue-${issue.id}/${Date.now()}-${safeName}`;
       const stored = await storagePut(objectKey, bytes, input.contentType);
-      const result = await db.insert(attachments).values({ issueId: issue.id, uploadedById: ctx.user.id, storageKey: stored.key, storageUrl: stored.url, fileName: safeName, contentType: input.contentType, sizeBytes: bytes.length });
-      const attachmentId = Number((result as unknown as Array<{ insertId: number }>)[0].insertId);
+      const [attachment] = await db.insert(attachments).values({ issueId: issue.id, uploadedById: ctx.user.id, storageKey: stored.key, storageUrl: stored.url, fileName: safeName, contentType: input.contentType, sizeBytes: bytes.length }).returning({ id: attachments.id });
+      if (!attachment) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Attachment creation did not return an identifier." });
+      const attachmentId = attachment.id;
       await recordActivity({ issueId: issue.id, actorId: ctx.user.id, type: "attachment.added", message: `Added evidence: ${safeName}`, metadata: { attachmentId, contentType: input.contentType, sizeBytes: bytes.length } });
       return { attachmentId, fileName: safeName, storageUrl: stored.url };
     }),
@@ -378,8 +380,9 @@ export const appRouter = router({
       const content = response.choices[0]?.message?.content;
       if (!content || typeof content !== "string") throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The AI assistant did not return a recommendation." });
       const draft = JSON.parse(content) as { summary: string; suggestedSeverity: string; suggestedLabels: string[]; duplicateCandidates: Array<{ issueId: number; reason: string }>; reproducibleSteps: string; caveats: string; confidence: number };
-      const result = await db.insert(aiRecommendations).values({ issueId: issue.id, requestedById: ctx.user.id, model, summary: draft.summary, suggestedSeverity: draft.suggestedSeverity, suggestedLabels: draft.suggestedLabels, duplicateCandidates: draft.duplicateCandidates, reproducibleSteps: draft.reproducibleSteps, caveats: draft.caveats, confidence: draft.confidence });
-      const recommendationId = Number((result as unknown as Array<{ insertId: number }>)[0].insertId);
+      const [recommendation] = await db.insert(aiRecommendations).values({ issueId: issue.id, requestedById: ctx.user.id, model, summary: draft.summary, suggestedSeverity: draft.suggestedSeverity, suggestedLabels: draft.suggestedLabels, duplicateCandidates: draft.duplicateCandidates, reproducibleSteps: draft.reproducibleSteps, caveats: draft.caveats, confidence: draft.confidence }).returning({ id: aiRecommendations.id });
+      if (!recommendation) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Recommendation creation did not return an identifier." });
+      const recommendationId = recommendation.id;
       await recordActivity({ issueId: issue.id, actorId: ctx.user.id, type: "ai.recommendation_created", message: "Generated an AI draft for human review", metadata: { recommendationId, model } });
       return { recommendationId, draft: { ...draft, state: "pending_review", model } };
     }),
