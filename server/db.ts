@@ -39,6 +39,12 @@ const roleRank: Record<ProjectRole, number> = {
   admin: 4,
 };
 
+export function resolveDatabaseConnectionString(
+  runtimeEnv: NodeJS.ProcessEnv = process.env,
+) {
+  return runtimeEnv.SUPABASE_DATABASE_URL || runtimeEnv.DATABASE_URL || ENV.databaseUrl;
+}
+
 export function roleCan(role: ProjectRole, minimum: ProjectRole) {
   return roleRank[role] >= roleRank[minimum];
 }
@@ -53,7 +59,7 @@ export function normalizeSlug(value: string) {
 }
 
 export async function getDb() {
-  const connectionString = process.env.SUPABASE_DATABASE_URL;
+  const connectionString = resolveDatabaseConnectionString();
   if (!_db && connectionString) {
     try {
       _pool = new Pool({
