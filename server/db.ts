@@ -45,6 +45,14 @@ export function resolveDatabaseConnectionString(
   return runtimeEnv.SUPABASE_DATABASE_URL || runtimeEnv.DATABASE_URL || ENV.databaseUrl;
 }
 
+export function resolveDatabaseConnectionSource(
+  runtimeEnv: NodeJS.ProcessEnv = process.env,
+) {
+  if (runtimeEnv.SUPABASE_DATABASE_URL) return "SUPABASE_DATABASE_URL";
+  if (runtimeEnv.DATABASE_URL) return "DATABASE_URL";
+  return ENV.databaseUrl ? "ENV.databaseUrl" : "missing";
+}
+
 export function roleCan(role: ProjectRole, minimum: ProjectRole) {
   return roleRank[role] >= roleRank[minimum];
 }
@@ -62,6 +70,11 @@ export async function getDb() {
   const connectionString = resolveDatabaseConnectionString();
   if (!_db && connectionString) {
     try {
+      if (process.env.VERCEL) {
+        console.info(
+          `[Database] Initializing PostgreSQL pool from ${resolveDatabaseConnectionSource()}`,
+        );
+      }
       _pool = new Pool({
         connectionString,
         ssl: { rejectUnauthorized: false },

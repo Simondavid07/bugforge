@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveDatabaseConnectionString } from "./db";
+import {
+  resolveDatabaseConnectionSource,
+  resolveDatabaseConnectionString,
+} from "./db";
 
 describe("resolveDatabaseConnectionString", () => {
   it("prefers the dedicated Supabase server secret", () => {
@@ -15,5 +18,16 @@ describe("resolveDatabaseConnectionString", () => {
     expect(
       resolveDatabaseConnectionString({ DATABASE_URL: "postgresql://fallback" }),
     ).toBe("postgresql://fallback");
+  });
+
+  it("identifies the selected key without exposing its value", () => {
+    expect(
+      resolveDatabaseConnectionSource({
+        SUPABASE_DATABASE_URL: "postgresql://supabase-pooler",
+      }),
+    ).toBe("SUPABASE_DATABASE_URL");
+    expect(resolveDatabaseConnectionSource({ DATABASE_URL: "postgresql://fallback" })).toBe(
+      "DATABASE_URL",
+    );
   });
 });
