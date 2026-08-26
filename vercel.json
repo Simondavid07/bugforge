@@ -4,8 +4,12 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "/api/[...path]?path=:path*"
+    },
+    {
       "source": "/manus-storage/:path*",
-      "destination": "/api/manus-storage/:path*"
+      "destination": "/api/[...path]?path=manus-storage/:path*"
     },
     {
       "source": "/((?!api/).*)",
