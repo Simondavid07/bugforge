@@ -202,8 +202,11 @@ export async function createWorkspaceWithProject(input: {
   return { workspaceId, projectId, slug };
 }
 
-export async function deleteWorkspace(workspaceId: number) {
-  const db = await requireDb();
+export async function deleteWorkspace(
+  workspaceId: number,
+  dbOverride?: ReturnType<typeof drizzle<typeof schema>>
+) {
+  const db = dbOverride ?? (await requireDb());
   return db.transaction(async tx => {
     const projectRows = await tx
       .select({ id: projects.id })
