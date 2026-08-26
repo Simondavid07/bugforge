@@ -34,3 +34,5 @@ For local development, add the local callback URL to Supabase Auth’s redirect 
 
 [1]: https://supabase.com/docs/guides/auth/social-login/auth-github "Supabase: Login with GitHub"
 [2]: https://supabase.com/docs/reference/javascript/auth-signinwithoauth "Supabase JavaScript: signInWithOAuth"
+
+Deployment note: the production commit is authored with the GitHub account canonical noreply email so Vercel can match the commit author.
