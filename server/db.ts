@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, max } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, max, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import {
@@ -200,6 +200,75 @@ export async function createWorkspaceWithProject(input: {
     .insert(projectMembers)
     .values({ projectId, userId: input.userId, role: "admin" });
   return { workspaceId, projectId, slug };
+}
+
+export async function deleteWorkspace(workspaceId: number) {
+  const db = await requireDb();
+  return db.transaction(async tx => {
+    const projectRows = await tx
+      .select({ id: projects.id })
+      .from(projects)
+      .where(eq(projects.workspaceId, workspaceId));
+    const projectIds = projectRows.map(row => row.id);
+    const issueRows = projectIds.length
+      ? await tx
+          .select({ id: issues.id })
+          .from(issues)
+          .where(inArray(issues.projectId, projectIds))
+      : [];
+    const issueIds = issueRows.map(row => row.id);
+    if (issueIds.length) {
+      await tx
+        .delete(issueActivity)
+        .where(inArray(issueActivity.issueId, issueIds));
+      await tx.delete(comments).where(inArray(comments.issueId, issueIds));
+      await tx
+        .delete(issueWatchers)
+        .where(inArray(issueWatchers.issueId, issueIds));
+      await tx
+        .delete(attachments)
+        .where(inArray(attachments.issueId, issueIds));
+      await tx
+        .delete(issueLabels)
+        .where(inArray(issueLabels.issueId, issueIds));
+      await tx
+        .delete(issueLinks)
+        .where(
+          or(
+            inArray(issueLinks.issueId, issueIds),
+            inArray(issueLinks.linkedIssueId, issueIds)
+          )
+        );
+      await tx
+        .delete(aiRecommendations)
+        .where(inArray(aiRecommendations.issueId, issueIds));
+      await tx.delete(issues).where(inArray(issues.id, issueIds));
+    }
+    if (projectIds.length) {
+      await tx
+        .delete(savedViews)
+        .where(inArray(savedViews.projectId, projectIds));
+      await tx
+        .delete(milestones)
+        .where(inArray(milestones.projectId, projectIds));
+      await tx
+        .delete(components)
+        .where(inArray(components.projectId, projectIds));
+      await tx.delete(labels).where(inArray(labels.projectId, projectIds));
+      await tx
+        .delete(projectMembers)
+        .where(inArray(projectMembers.projectId, projectIds));
+      await tx.delete(projects).where(inArray(projects.id, projectIds));
+    }
+    await tx
+      .delete(notifications)
+      .where(eq(notifications.workspaceId, workspaceId));
+    await tx
+      .delete(workspaceMembers)
+      .where(eq(workspaceMembers.workspaceId, workspaceId));
+    await tx.delete(workspaces).where(eq(workspaces.id, workspaceId));
+    return { success: true, workspaceId } as const;
+  });
 }
 
 export async function getMembership(userId: number, projectId: number) {
