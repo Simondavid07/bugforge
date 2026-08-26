@@ -1,9 +1,12 @@
 import type { Express } from "express";
-import type { Application, Request, Response } from "express";
+import type { Application } from "express";
 import { ENV } from "./env";
 
 export function registerStorageProxy(app: Application) {
-  app.get(["/manus-storage/*", "/api/manus-storage/*"], async (req: Request, res: Response) => {
+  // Vercel supplies Node request/response objects to the adapter. Express
+  // decorates them at runtime, so keep this boundary untyped instead of asking
+  // Vercel's isolated compiler to reconcile its helper types with Express.
+  app.get(["/manus-storage/*", "/api/manus-storage/*"], async (req: any, res: any) => {
     const key = (req.params as Record<string, string>)[0];
     if (!key) {
       res.status(400).send("Missing storage key");

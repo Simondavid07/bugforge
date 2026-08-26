@@ -1,15 +1,14 @@
-import type { Request, Response } from "express";
 import type { User } from "../../drizzle/schema";
 import { sdk } from "./sdk";
 
 type ExpressContextOptions = {
-  req: Request;
-  res: Response;
+  req: any;
+  res: any;
 };
 
 export type TrpcContext = {
-  req: Request;
-  res: Response;
+  req: any;
+  res: any;
   user: User | null;
 };
 export async function createContext(
