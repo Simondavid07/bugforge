@@ -1,5 +1,5 @@
-import type { User } from "../../drizzle/schema";
-import { sdk } from "./sdk.js";
+import type { User } from "../../drizzle/schema.js";
+import { authenticateRequest } from "./supabaseAuth.js";
 
 type ExpressContextOptions = {
   req: any;
@@ -11,13 +11,14 @@ export type TrpcContext = {
   res: any;
   user: User | null;
 };
+
 export async function createContext(
   opts: ExpressContextOptions
 ): Promise<TrpcContext> {
   let user: User | null = null;
 
   try {
-    user = await sdk.authenticateRequest(opts.req);
+    user = await authenticateRequest(opts.req);
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;
