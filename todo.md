@@ -110,13 +110,14 @@
 - [x] Audit the managed runtime database and enabled Supabase project for a safe, explicit integration boundary without risking production data.
 - [x] Harden production configuration, health guidance, and deployment documentation for the current managed full-stack runtime.
 - [x] Run full build, type, test, visual, and runtime validation for production readiness.
-- [ ] Synchronize all production-readiness updates to the private GitHub repository.
+- [x] Synchronize all production-readiness updates to the private GitHub repository.
 - [ ] Save and deliver the production-ready checkpoint with clear publishing instructions.
 - [x] Apply route-level code splitting to reduce the initial production JavaScript bundle and re-run the production build audit.
 - [x] Serve the built production artifact and smoke-test core authenticated routes in the production runtime.
 - [x] Re-run desktop and mobile visual review after bundle optimization and document the results.
 - [x] Complete the remaining production-hardening evidence and verified release checklist.
-- [ ] Smoke-test authenticated workspace and Issue Explorer routes against the built production server.
-- [ ] Document the remaining shared vendor-chunk warning and its acceptable performance rationale.
-- [ ] Synchronize the latest production optimization and readiness documentation to the private GitHub repository.
+- [x] Smoke-test authenticated workspace and Issue Explorer routes against the built production server.
+- [x] Document the remaining shared vendor-chunk warning and its acceptable performance rationale.
+- [x] Synchronize the latest production optimization and readiness documentation to the private GitHub repository.
 - [ ] Save and deliver the verified production-ready checkpoint.
+- [x] Verify the built production workspace shell and Issue Explorer in an authenticated browser session after navigation and refresh.
