@@ -9,6 +9,12 @@ const defaultSidebar = ["/", "/issues", "/boards", "/analytics", "/notifications
 const sidebarLabels: Record<string, string> = { "/": "Overview", "/issues": "Issues", "/boards": "Workboard", "/analytics": "Insights", "/notifications": "Inbox" };
 type MotionLevel = "still" | "soft" | "expressive";
 
+export function applyProjectAccent(accentColor: string | null | undefined, root: Pick<HTMLElement, "style">) {
+  if (!accentColor) return false;
+  root.style.setProperty("--project-accent", accentColor);
+  return true;
+}
+
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -40,9 +46,7 @@ export default function ProjectPersonalization() {
     document.documentElement.dataset.motion = motion;
     localStorage.setItem("bugforge-motion", motion);
   }, [motion]);
-  useEffect(() => {
-    if (activeProject?.accentColor) document.documentElement.style.setProperty("--project-accent", activeProject.accentColor);
-  }, [activeProject?.accentColor]);
+  useEffect(() => { applyProjectAccent(activeProject?.accentColor, document.documentElement); }, [activeProject?.accentColor]);
   useEffect(() => {
     const menu = document.querySelector<HTMLElement>("[data-slot='sidebar-menu']");
     if (!menu) return;

@@ -100,9 +100,10 @@
 - [x] Create the default BugForge workspace and its initial project as the authenticated administrator.
 - [x] Verify project-accent selection persists and visibly updates for that active project.
 - [x] Keep the managed MySQL/TiDB runtime database in place and report Supabase migration as a separate explicit decision.
-- [ ] Select an accent through the authenticated Personalize interface and confirm the project update mutation succeeds without direct database changes.
-- [ ] Verify the selected accent remains visible in the workspace shell after a refresh and document the result.
-- [ ] Verify the user-completed live accent selection and refreshed sage workspace state.
-- [ ] Run the complete type and test suite after final configuration changes.
-- [ ] Push the final checkpoint-ready code and documentation to the private GitHub remote.
+- [x] Select an accent through the authenticated Personalize interface and confirm the project update mutation succeeds without direct database changes.
+- [x] Verify the selected accent remains visible in the workspace shell after a refresh and document the result.
+- [x] Verify the user-completed live accent selection and refreshed sage workspace state.
+- [x] Run the complete type and test suite after final configuration changes.
+- [x] Push the final checkpoint-ready code and documentation to the private GitHub remote.
 - [ ] Save and deliver the final repository and integration checkpoint.
+- [x] Add a component-level test covering refreshed project accent data applying the visible workspace CSS accent variable.
