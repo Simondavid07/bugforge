@@ -30,3 +30,11 @@
 - [x] Redesign the issue-detail loading, unavailable, collaboration, workflow, AI-review, evidence, and linking states to match the premium visual system.
 - [x] Re-run desktop and mobile visual review after the issue-detail refresh, then checkpoint the complete redesign.
 - [x] Save the post-redesign BugForge checkpoint and deliver the refreshed version.
+- [x] Replace the midnight-glass interface with a clean, light, playful product design that restores generous whitespace, optimistic color, and calm visual hierarchy.
+- [x] Rebuild the workspace shell and all core screens with a polished editorial layout rather than a dashboard-heavy console treatment.
+- [x] Add high-quality, accessibility-aware scrolling, entrance motion, hover feedback, micro-interactions, and subtle cursor-responsive decorative depth.
+- [x] Create a memorable but restrained playful visual motif that reinforces issue workflow without reducing readability or professional credibility.
+- [x] Perform desktop and mobile visual review, validate functionality, and checkpoint the corrected clean-playful experience.
+- [x] Redesign the populated Issue Desk to the clean editorial light system and confirm it no longer inherits the previous midnight styling.
+- [x] Refresh populated explorer and workboard states with the same light editorial cards, friendly hierarchy, and interaction feedback as the redesigned shell.
+- [x] Save and deliver a new post-clean-playful checkpoint after final desktop/mobile verification.
