@@ -38,6 +38,7 @@ export const projects = mysqlTable("projects", {
   name: varchar("name", { length: 120 }).notNull(),
   key: varchar("key", { length: 12 }).notNull(),
   description: longtext("description"),
+  accentColor: varchar("accentColor", { length: 7 }).notNull().default("#A55343"),
   workflow: json("workflow").$type<string[]>().notNull(),
   createdById: int("createdById").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

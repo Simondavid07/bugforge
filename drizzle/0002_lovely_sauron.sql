@@ -1,0 +1,1 @@
+ALTER TABLE `projects` ADD `accentColor` varchar(7) DEFAULT '#A55343' NOT NULL;

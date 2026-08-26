@@ -145,6 +145,13 @@ export const appRouter = router({
       await db.update(projects).set({ workflow }).where(eq(projects.id, input.projectId));
       return { success: true, workflow };
     }),
+    updateAccent: protectedProcedure.input(z.object({ projectId: z.number().int().positive(), accentColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Use a six-digit hex color.") })).mutation(async ({ ctx, input }) => {
+      const db = await requireDb();
+      await access(ctx.user.id, input.projectId, "admin");
+      const accentColor = input.accentColor.toUpperCase();
+      await db.update(projects).set({ accentColor }).where(eq(projects.id, input.projectId));
+      return { success: true, accentColor };
+    }),
   }),
 
   issues: router({

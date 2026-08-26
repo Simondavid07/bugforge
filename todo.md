@@ -69,3 +69,8 @@
 - [x] Force and visually inspect the dark edition at desktop and mobile sizes for contrast, readability, and layout stability.
 - [x] Save and deliver the post-verification dark-theme and motion checkpoint.
 - [x] Correct dark-edition analytics and pastel-card contrast, then restore the light default with persisted user-selected theme preference.
+- [x] Correct the dark-sidebar navigation colors so active, inactive, hover, and focus states have clear contrast and no clipped decorative bleed.
+- [x] Add a project-level accent color field, authorized update contract, migration, and project-settings interface for distinguishable workspaces.
+- [x] Add an accessible Cmd/Ctrl+K command palette for quick route, project, and issue navigation.
+- [x] Add a persisted user motion-intensity setting that controls decorative and interaction animation without overriding reduced-motion safeguards.
+- [x] Add tests, verify desktop/mobile states, and checkpoint the navigation and personalization upgrade.

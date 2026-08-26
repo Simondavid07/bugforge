@@ -50,4 +50,14 @@ describe("BugForge project-scoped procedures", () => {
     expect(mocks.requireProjectRole).toHaveBeenCalledWith(9, 41, "admin");
     expect(onDuplicateKeyUpdate).toHaveBeenCalledOnce();
   });
+
+  it("requires an admin and normalizes a project accent color before saving", async () => {
+    const where = vi.fn(async () => undefined);
+    const set = vi.fn(() => ({ where }));
+    mocks.db = { update: vi.fn(() => ({ set })) };
+    const caller = appRouter.createCaller(authenticatedContext());
+    await expect(caller.project.updateAccent({ projectId: 41, accentColor: "#75937e" })).resolves.toEqual({ success: true, accentColor: "#75937E" });
+    expect(mocks.requireProjectRole).toHaveBeenCalledWith(9, 41, "admin");
+    expect(set).toHaveBeenCalledWith({ accentColor: "#75937E" });
+  });
 });
