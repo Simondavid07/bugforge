@@ -62,6 +62,24 @@ describe("BugForge project-scoped procedures", () => {
     expect(set).toHaveBeenCalledWith({ accentColor: "#75937E" });
   });
 
+  it("returns the newly saved accent in the active workspace project data", async () => {
+    let storedAccent = "#A55343";
+    const where = vi.fn(async () => undefined);
+    mocks.db = { update: vi.fn(() => ({ set: vi.fn((values: { accentColor: string }) => { storedAccent = values.accentColor; return { where }; }) })) };
+    const caller = appRouter.createCaller(authenticatedContext());
+    await expect(caller.project.updateAccent({ projectId: 41, accentColor: "#75937e" })).resolves.toEqual({ success: true, accentColor: "#75937E" });
+    const membershipWhere = vi.fn(async () => [{ workspaceId: 7, role: "admin", name: "Orbit Labs", slug: "orbit-labs" }]);
+    const directProjectWhere = vi.fn(async () => []);
+    const adminProjectWhere = vi.fn(async () => [{ id: 41, workspaceId: 7, name: "Web Console", key: "WEB", accentColor: storedAccent }]);
+    mocks.db = {
+      select: vi.fn()
+        .mockReturnValueOnce({ from: vi.fn(() => ({ innerJoin: vi.fn(() => ({ where: membershipWhere })) })) })
+        .mockReturnValueOnce({ from: vi.fn(() => ({ innerJoin: vi.fn(() => ({ where: directProjectWhere })) })) })
+        .mockReturnValueOnce({ from: vi.fn(() => ({ where: adminProjectWhere })) }),
+    };
+    await expect(caller.workspace.mine()).resolves.toMatchObject({ projects: [{ id: 41, accentColor: "#75937E" }] });
+  });
+
   it("persists a complete personalization preference set for the signed-in user", async () => {
     const onDuplicateKeyUpdate = vi.fn(async () => undefined);
     mocks.db = { insert: vi.fn(() => ({ values: vi.fn(() => ({ onDuplicateKeyUpdate })) })) };

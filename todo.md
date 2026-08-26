@@ -85,6 +85,24 @@
 - [x] Save and deliver the post-validation personalization checkpoint.
 - [x] Add explicit accessible Move up and Move down controls for sidebar and project ordering, with live feedback and disabled edge states.
 - [x] Add focused saved-search behavior coverage for persisted retrieval and issue-filter path construction.
-- [ ] Save and deliver the final accessibility-complete personalization checkpoint.
+- [x] Save and deliver the final accessibility-complete personalization checkpoint.
 - [x] Add an integration-style saved-search test covering preference persistence, retrieval, and issue-filter navigation.
 - [x] Add one end-to-end saved-search regression test spanning preference save, retrieval, and issue-filter path construction.
+- [x] Diagnose and fix project accent updates so authorized project admins can apply and see the selected color.
+- [x] Verify the current GitHub repository linkage and database provider status, then document any required connection step.
+- [ ] Validate the corrected accent flow and integration status, checkpoint the changes, and report the outcome.
+- [x] Reproduce the accent path with an authorized active project and confirm the selected accent persists into workspace data and visible styling.
+- [x] Add focused coverage for active-project accent persistence and server authorization behavior.
+- [x] Document the verified GitHub remote status and current managed-MySQL versus Supabase connection requirements.
+- [ ] Re-run validation, checkpoint the corrected investigation, and report the required user action for GitHub or Supabase if desired.
+- [x] Complete live browser verification of project-accent selection after an authorized workspace and active project exist.
+- [x] Create a private GitHub repository for BugForge and push the current code without replacing the managed project remote.
+- [x] Create the default BugForge workspace and its initial project as the authenticated administrator.
+- [x] Verify project-accent selection persists and visibly updates for that active project.
+- [x] Keep the managed MySQL/TiDB runtime database in place and report Supabase migration as a separate explicit decision.
+- [ ] Select an accent through the authenticated Personalize interface and confirm the project update mutation succeeds without direct database changes.
+- [ ] Verify the selected accent remains visible in the workspace shell after a refresh and document the result.
+- [ ] Verify the user-completed live accent selection and refreshed sage workspace state.
+- [ ] Run the complete type and test suite after final configuration changes.
+- [ ] Push the final checkpoint-ready code and documentation to the private GitHub remote.
+- [ ] Save and deliver the final repository and integration checkpoint.

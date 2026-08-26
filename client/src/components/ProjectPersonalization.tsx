@@ -166,9 +166,11 @@ export default function ProjectPersonalization() {
         </div>
         <div className="mt-5 border-t border-[#D8CDC0] pt-4 dark:border-[#4A433D]">
           <p className="eyebrow">Project accent</p>
+          {!projectId ? <p className="mt-1 text-[11px] text-[#665D56] dark:text-[#C9BEB4]">Create or choose a project first; its accent controls will then unlock here.</p> : <p className="mt-1 text-[11px] text-[#665D56] dark:text-[#C9BEB4]">Applies to {activeProject?.name ?? "this project"}. Project admins can update its mark.</p>}
           <div className="mt-2 flex flex-wrap gap-2">
             {accents.map(color => <button key={color} disabled={!projectId || updateAccent.isPending} aria-label={`Use ${color} as project accent`} onClick={() => projectId && updateAccent.mutate({ projectId, accentColor: color })} className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-transparent ring-offset-2 transition hover:scale-110 disabled:opacity-50" style={{ backgroundColor: color, ...(accent === color ? { borderColor: "#1E1A18" } : {}) }}>{accent === color && <Check className="h-4 w-4 text-white" />}</button>)}
           </div>
+          {updateAccent.error && <p role="alert" className="mt-2 text-xs text-[#A55343]">{updateAccent.error.message}</p>}
         </div>
         <div className="mt-5 border-t border-[#D8CDC0] pt-4 dark:border-[#4A433D]">
           <p className="eyebrow">Arrange your flow</p>
