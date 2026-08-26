@@ -21,9 +21,9 @@ import {
   users,
   workspaceMembers,
   workspaces,
-} from "../drizzle/schema";
-import * as schema from "../drizzle/schema";
-import { ENV } from "./_core/env";
+} from "../drizzle/schema.js";
+import * as schema from "../drizzle/schema.js";
+import { ENV } from "./_core/env.js";
 
 let _pool: Pool | null = null;
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;

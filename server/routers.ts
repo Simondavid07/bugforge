@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
-import { aiRecommendations, attachments, comments, components, issueLabels, issueLinks, issueWatchers, issues, labels, milestones, notifications, projectMembers, projects, savedViews, userPreferences, users, workspaceMembers, workspaces } from "../drizzle/schema";
+import { aiRecommendations, attachments, comments, components, issueLabels, issueLinks, issueWatchers, issues, labels, milestones, notifications, projectMembers, projects, savedViews, userPreferences, users, workspaceMembers, workspaces } from "../drizzle/schema.js";
 import {
   countProjectStats,
   createWorkspaceWithProject,
@@ -14,13 +14,13 @@ import {
   requireDb,
   requireProjectRole,
   roleCan,
-} from "./db";
-import { invokeLLM, listLLMModels } from "./_core/llm";
-import { storagePut } from "./storage";
-import { COOKIE_NAME } from "@shared/const";
-import { getSessionCookieOptions } from "./_core/cookies";
-import { systemRouter } from "./_core/systemRouter";
-import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
+} from "./db.js";
+import { invokeLLM, listLLMModels } from "./_core/llm.js";
+import { storagePut } from "./storage.js";
+import { COOKIE_NAME } from "../shared/const.js";
+import { getSessionCookieOptions } from "./_core/cookies.js";
+import { systemRouter } from "./_core/systemRouter.js";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc.js";
 
 const projectIdInput = z.object({ projectId: z.number().int().positive() });
 const issueIdInput = z.object({ issueId: z.number().int().positive() });

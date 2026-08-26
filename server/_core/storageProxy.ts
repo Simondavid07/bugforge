@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import type { Application } from "express";
-import { ENV } from "./env";
+import { ENV } from "./env.js";
 
 export function registerStorageProxy(app: Application) {
   // Vercel supplies Node request/response objects to the adapter. Express

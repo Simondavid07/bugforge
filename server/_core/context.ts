@@ -1,5 +1,5 @@
 import type { User } from "../../drizzle/schema";
-import { sdk } from "./sdk";
+import { sdk } from "./sdk.js";
 
 type ExpressContextOptions = {
   req: any;
