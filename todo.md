@@ -22,3 +22,11 @@
 - [x] Add procedure-level authorization tests and save a polished implementation prompt plus submission-ready summary document.
 - [x] Replace page-limited workboard sourcing with a dedicated full-project board query so risk signals remain accurate beyond 100 issues.
 - [x] Add authenticated project-scope and role-threshold tests for representative server procedures.
+- [x] Replace the neo-brutalist dashboard treatment with a premium, contemporary visual system that feels smooth, calm, and high-craft.
+- [x] Rebuild the application shell with refined navigation, richer spatial hierarchy, translucent surfaces, and responsive mobile behavior.
+- [x] Upgrade primary issue-management interactions with polished hover, focus, loading, success, and motion feedback while preserving accessibility and reduced-motion support.
+- [x] Refresh onboarding, explorer, board, analytics, notification, and issue-detail states so the product feels cohesive and compelling across the full workflow.
+- [x] Visually review the redesigned desktop and mobile experience, run regression tests, and checkpoint the UI refresh.
+- [x] Redesign the issue-detail loading, unavailable, collaboration, workflow, AI-review, evidence, and linking states to match the premium visual system.
+- [x] Re-run desktop and mobile visual review after the issue-detail refresh, then checkpoint the complete redesign.
+- [x] Save the post-redesign BugForge checkpoint and deliver the refreshed version.
