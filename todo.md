@@ -127,17 +127,21 @@
 - [x] Audit and back up the managed MySQL/TiDB schema and data before any external database conversion.
 - [x] Convert BugForge’s Drizzle runtime from MySQL to PostgreSQL and apply the equivalent schema to dedicated Supabase.
 - [x] Migrate authorized BugForge data into Supabase and verify row-level integrity without altering Lock Note data.
-- [ ] Configure Vercel runtime environment and deploy the converted application from the private GitHub repository.
+- [x] Configure Vercel runtime environment and deploy the converted application from the private GitHub repository.
 - [ ] Verify the live Vercel deployment, Supabase database connection, authentication path, and core workspace routes.
 - [ ] Preserve rollback instructions, checkpoint the migration, and report the verified deployment URL and database status.
 - [x] Diagnose the GitHub authorization 404 and establish a working Vercel link for the private BugForge repository.
 - [x] Diagnose Vercel’s repository-preparation failure and, if unresolved, use an explicit direct-deployment fallback.
-- [ ] Replace the unsafe Vercel output with a compatible serverless API/static deployment architecture before resuming production traffic.
-- [ ] Fix the live Vercel serverless-function compilation and `/api/trpc` routing failure observed after the first resumed deployment.
-- [ ] Add and verify a live-safe Supabase connectivity status to the public system-health response for external deployment validation.
+- [x] Replace the unsafe Vercel output with a compatible serverless API/static deployment architecture before resuming production traffic.
+- [x] Fix the live Vercel serverless-function compilation and `/api/trpc` routing failure observed after the first resumed deployment.
+- [x] Add and verify a live-safe Supabase connectivity status to the public system-health response for external deployment validation.
 - [x] Obtain and validate the password-bearing Supabase transaction-pooler URI; direct host and port alone are not sufficient for server connectivity.
 - [x] Inspect the requested `supabase/agent-skills` package before installing or relying on it for migration work.
 - [x] Reset the dedicated Supabase database password through its authenticated dashboard and store the resulting transaction-pooler URI as a server secret.
 - [x] Re-run the live PostgreSQL health test with the reset credential before changing the BugForge runtime.
 - [x] Enable RLS on every BugForge table in the exposed Supabase public schema and harden the timestamp trigger function search path.
 - [x] Re-run Supabase security advisors after the RLS hardening and record the remaining findings accurately.
+- [x] Rotate the dedicated Supabase credential in protected local, Vercel Production, and Vercel Preview configuration, then redeploy production.
+- [x] Verify the unique and stable Vercel production health endpoints return HTTP 200 with `database: connected` and confirm the unauthenticated tRPC contract remains JSON rather than a routing failure.
+- [ ] Allowlist `bugforge-lyart.vercel.app` for the Manus OAuth application, then verify authenticated Vercel workspace and issue-management routes at desktop and mobile widths.
+- [ ] Establish compatible server-only external alternatives for managed Forge storage and AI, then verify attachments, personalization uploads, and AI recommendation drafts on Vercel.
