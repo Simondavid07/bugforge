@@ -134,6 +134,7 @@
 - [x] Diagnose Vercel’s repository-preparation failure and, if unresolved, use an explicit direct-deployment fallback.
 - [ ] Replace the unsafe Vercel output with a compatible serverless API/static deployment architecture before resuming production traffic.
 - [ ] Fix the live Vercel serverless-function compilation and `/api/trpc` routing failure observed after the first resumed deployment.
+- [ ] Add and verify a live-safe Supabase connectivity status to the public system-health response for external deployment validation.
 - [x] Obtain and validate the password-bearing Supabase transaction-pooler URI; direct host and port alone are not sufficient for server connectivity.
 - [x] Inspect the requested `supabase/agent-skills` package before installing or relying on it for migration work.
 - [x] Reset the dedicated Supabase database password through its authenticated dashboard and store the resulting transaction-pooler URI as a server secret.
