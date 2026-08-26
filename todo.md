@@ -38,3 +38,10 @@
 - [x] Redesign the populated Issue Desk to the clean editorial light system and confirm it no longer inherits the previous midnight styling.
 - [x] Refresh populated explorer and workboard states with the same light editorial cards, friendly hierarchy, and interaction feedback as the redesigned shell.
 - [x] Save and deliver a new post-clean-playful checkpoint after final desktop/mobile verification.
+- [x] Correct visual alignment, spacing rhythm, container widths, and responsive hierarchy across the BugForge shell and core screens.
+- [x] Add a desktop-only custom cursor with a smooth trailing ring, interactive hover state, and full accessibility safeguards.
+- [x] Add cursor-tracking depth effects to selected surfaces and more coherent scroll-reveal animation without scroll-jacking.
+- [x] Refine hover, press, focus, loading, and navigation micro-interactions to make the workspace feel calm and intentional.
+- [x] Validate desktop/mobile composition and motion behavior, then checkpoint the interaction-quality upgrade.
+- [x] Directly tighten the shell header, main content frame, mobile spacing, and core-screen container alignment based on the visual review.
+- [x] Save and deliver the post-interaction-quality checkpoint after the final alignment verification.
