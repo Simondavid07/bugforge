@@ -11,7 +11,8 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true,
+    // AuthCallback.tsx performs the explicit PKCE exchange exactly once.
+    detectSessionInUrl: false,
     flowType: "pkce",
   },
 });
