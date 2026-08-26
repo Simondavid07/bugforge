@@ -26,6 +26,24 @@ The browser keeps the Supabase session through the official Supabase client. The
 
 All existing protected procedures continue to receive the same numeric BugForge user record through `ctx.user`, so workspace, project, issue, notification, personalization, and role checks remain unchanged. The obsolete Manus OAuth callback and SDK are no longer registered or included in the application source.
 
+## Configuration checklist
+
+1. Create a GitHub OAuth application under the account that owns BugForge.
+2. Set its homepage URL to `https://bugforge-lyart.vercel.app`.
+3. Set its GitHub authorization callback URL to `https://zznvjtdspjampmztrunx.supabase.co/auth/v1/callback`.
+4. In Supabase Authentication → Sign In / Providers, enable GitHub and enter the GitHub client ID and client secret. Keep the client secret only in Supabase; do not commit it to Git or expose it in frontend code.
+5. In Supabase Authentication → URL Configuration, set the Site URL to `https://bugforge-lyart.vercel.app` and add `https://bugforge-lyart.vercel.app/auth/callback` to Redirect URLs.
+6. Push the application source to the linked GitHub repository. Vercel deploys the production branch automatically; the commit email must match a GitHub account recognized by the Vercel project.
+7. Test with **Continue with GitHub**, approve the read-only profile/email request, confirm the browser reaches `/auth/callback`, and verify the authenticated workspace loads.
+
+## Production verification
+
+The production flow was tested on August 27, 2026 using the `Simondavid07` GitHub account. GitHub consent completed, Supabase returned the PKCE callback code, the BugForge workspace opened as an authenticated user, and the protected `workspace.mine` procedure returned HTTP 200.
+
+A temporary workspace named `BugForge E2E Test` with project key `E2E26` was created through the production `workspace.create` procedure. The response returned HTTP 200 with workspace ID `2` and project ID `2`; a subsequent authenticated `workspace.mine` request returned both the original `WEB` project and `E2E26`, and the refreshed production UI displayed `E2E26 — E2E Console` in the project selector. This test workspace was intentionally retained because BugForge does not currently expose a safe workspace-delete path in the tested UI.
+
+The latest production build completed successfully. Runtime logs showed successful authenticated requests and no application exception. Vercel still reports Node’s `DEP0169` `url.parse()` deprecation warning from the Express 4 request-parser dependency; it is non-fatal and unrelated to authentication. The optional Umami analytics placeholders were moved into conditional application bootstrap code, so builds without analytics variables no longer emit the previous unresolved-placeholder warnings.
+
 ## Local development
 
 For local development, add the local callback URL to Supabase Auth’s redirect allowlist and register the corresponding local callback with the GitHub OAuth application if local GitHub sign-in is needed. The production configuration must remain pointed at the Vercel callback above.
