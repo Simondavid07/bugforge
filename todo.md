@@ -59,3 +59,6 @@
 - [x] Save and deliver a final checkpoint after the explicit per-page correspondence marker rollout is verified.
 - [x] Add the missing Insights and Inbox correspondence marker calls and verify all six core pages register their own correspondence surface.
 - [x] Save and deliver the final Lock Note-inspired BugForge checkpoint after full route verification.
+- [x] Repair the desktop application frame so page content no longer overlaps or sits beneath the fixed sidebar and header.
+- [x] Ensure correspondence-route decoration is clipped to the content pane and cannot bleed into the navigation chrome.
+- [x] Verify the repaired frame at the supplied wide viewport and on mobile, then checkpoint the layout fix.
