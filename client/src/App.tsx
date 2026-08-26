@@ -1,42 +1,17 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import DashboardLayout from "@/components/DashboardLayout";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import Analytics from "@/pages/Analytics";
+import Boards from "@/pages/Boards";
+import Home from "@/pages/Home";
+import IssueDetail from "@/pages/IssueDetail";
+import IssueExplorer from "@/pages/IssueExplorer";
+import Notifications from "@/pages/Notifications";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
 
-function Router() {
-  // make sure to consider if you need authentication for certain routes
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
-function App() {
-  return (
-    <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
-  );
-}
-
-export default App;
+function WorkspaceRoute({ component: Component }: { component: React.ComponentType }) { return <DashboardLayout><Component /></DashboardLayout>; }
+function Router() { return <Switch><Route path="/" component={() => <WorkspaceRoute component={Home} />} /><Route path="/issues" component={() => <WorkspaceRoute component={IssueExplorer} />} /><Route path="/issues/:id" component={() => <WorkspaceRoute component={IssueDetail} />} /><Route path="/boards" component={() => <WorkspaceRoute component={Boards} />} /><Route path="/analytics" component={() => <WorkspaceRoute component={Analytics} />} /><Route path="/notifications" component={() => <WorkspaceRoute component={Notifications} />} /><Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch>; }
+export default function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light" switchable><TooltipProvider><Toaster /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>; }

@@ -1,0 +1,24 @@
+# Project TODO
+
+- [x] Create a responsive authenticated BugForge workspace shell with persistent navigation, accessible keyboard controls, and light/dark themes.
+- [x] Add workspace, project, membership, and project-role data structures with role-aware server-side authorization.
+- [x] Add structured issue records with severity, priority, status, assignee, reporter, labels, components, milestones, descriptions, and reproducible steps.
+- [x] Implement a configurable issue workflow spanning intake, triage, assignment, verification, resolution, and closure, with immutable activity history.
+- [x] Implement issue discovery with keyword search, filter combinations, sorting, pagination, and per-user saved views.
+- [x] Build collaborative issue detail pages with threaded comments, safe @mentions, watchers, duplicate and related-issue links, plus attachment metadata and secure file references.
+- [x] Build personal and team workboards for assigned work, untriaged reports, overdue items, and release blockers.
+- [x] Build project analytics dashboards for issue health, severity distribution, aging, throughput, and release-readiness signals.
+- [x] Add in-app notification records and UI for mentions, assignments, watcher additions, and watched-issue status changes.
+- [x] Integrate a simple live-catalog compact-model assistant for bug-report summaries, severity and label recommendations, duplicate candidates, and draft reproducible test steps.
+- [x] Ensure every compact-model output is clearly marked as a recommendation and requires explicit human review before applying it to an issue.
+- [x] Apply a vibrant Memphis-inspired visual system with soft peach, mint, lilac, yellow, bold black typography, and geometric contrast motifs.
+- [x] Add secure data validation, project-scoped permission tests, and user-facing empty, loading, and error states.
+- [x] Verify frontend behavior and backend contracts with Vitest, run type checks, and perform desktop and mobile visual review.
+- [x] Produce a polished final implementation prompt and submission-ready product summary.
+- [x] Add issue-list pagination and user-selectable sorting to the search contract and Issue Explorer.
+- [x] Render threaded comment replies, strengthen mention recipient resolution, and add UI controls for related and duplicate issue links.
+- [x] Add dedicated personal and team board sections for assigned work, untriaged reports, overdue issues, and release blockers.
+- [x] Update the AI requirement and interface to document the compact live-catalog model substitute rather than claiming a nonexistent Manus 1.6 model identifier.
+- [x] Add procedure-level authorization tests and save a polished implementation prompt plus submission-ready summary document.
+- [x] Replace page-limited workboard sourcing with a dedicated full-project board query so risk signals remain accurate beyond 100 issues.
+- [x] Add authenticated project-scope and role-threshold tests for representative server procedures.
