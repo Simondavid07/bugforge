@@ -1,6 +1,6 @@
 # External deployment research record
 
-**Reviewed and applied:** 26 August 2026
+**Reviewed and applied:** 27 August 2026
 
 | Topic | Decision recorded for BugForge | Source |
 |---|---|---|
@@ -13,11 +13,17 @@
 | Internal routing | Rewrite legacy `/manus-storage/*` URLs into the Express serverless function, preserve `/api/*` for tRPC, and send the public Supabase Auth PKCE route `/auth/callback` to the SPA. | [Vercel rewrites](https://vercel.com/docs/routing/rewrites) |
 | Password rotation procedure | Reset the dedicated Supabase password, update only protected server-side connection values, validate locally with `SELECT 1`, update Vercel Production and Preview, and redeploy before exercising the live health route. | [Supabase: Connect to your database](https://supabase.com/docs/guides/database/connecting-to-postgres) |
 | GitHub login callback handling | Register GitHub’s callback with Supabase Auth, allowlist the Vercel SPA callback in Supabase, exchange the PKCE code exactly once in the browser, and validate the resulting bearer token server-side. | [Supabase: Login with GitHub](https://supabase.com/docs/guides/auth/social-login/auth-github) and [exchangeCodeForSession](https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession) |
+| Private object storage | Use a private Supabase Storage bucket, retain a non-public object marker in PostgreSQL, and issue a short-lived signed read URL only after the application’s own workspace/project authorization. Do not expose the service-role key or add a browser Storage policy. | [Supabase: Storage access control](https://supabase.com/docs/guides/storage/security/access-control) and [Create signed URL](https://supabase.com/docs/reference/javascript/storage-from-createsignedurl) |
+| External AI Gateway | Use Vercel Function OIDC rather than a persisted AI key. AI Gateway’s OpenAI-compatible endpoint supports the existing strict `json_schema` response format, allowing the application’s human-review draft safeguard to remain unchanged. | [Vercel AI Gateway: OIDC](https://vercel.com/docs/ai-gateway/authentication-and-byok/oidc) and [Structured Outputs](https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/structured-outputs) |
 
 ## Applied verification record
 
 Following the second credential rotation, the focused live Supabase test passed using the protected server connection string. Vercel Production and Preview values were then rotated, and production deployment `AiZd2t9T1SwmSBXzbXjhrXhQV5NR` reached **Ready**. Its assigned stable domain and unique URL both returned HTTP 200 with the safe response `{ok:true,database:"connected"}`. The stable unauthenticated `auth.me` procedure also returned HTTP 200 and JSON null.
 
-The earlier Manus OAuth redirect-domain blocker no longer applies. The user configured GitHub OAuth through Supabase Auth, and a fresh Vercel browser review confirmed a signed-in workspace plus a Supabase Auth storage marker. During reconciliation, the GitHub OAuth App callback was restored to the required Supabase Auth callback after a temporary inspection change. Forge storage and AI runtime credentials remain managed-only and have not been represented as working on Vercel.
+The earlier Manus OAuth redirect-domain blocker no longer applies. The user configured GitHub OAuth through Supabase Auth, and a fresh Vercel browser review confirmed a signed-in workspace plus a Supabase Auth storage marker. During reconciliation, the GitHub OAuth App callback was restored to the required Supabase Auth callback after a temporary inspection change.
 
-> The Vercel and Supabase guidance supports the current source layout and database connection model. It does not establish that managed Forge credentials can be safely transferred outside the managed runtime, nor does it configure an external OAuth redirect allowlist automatically.
+The private `bugforge-private` Storage bucket was then verified locally through a bounded upload/sign/read/delete test and in production by an authenticated avatar upload. The object key and `supabase-storage://` marker persisted to PostgreSQL; the browser received a short-lived signed URL, not a service role or public object address. Vercel Production and Preview hold the Storage configuration as protected variables.
+
+The current production source also replaces managed Forge use for AI drafts with Vercel AI Gateway using the request-scoped OIDC header. The build is ready on commit `a1e3fa7`, and isolated tests prove OIDC preference, managed rollback fallback, and no-credential failure behavior. A live model invocation remains deliberately unverified because the owner has not enabled model-request funding; no model request or payment action was attempted.
+
+> The Vercel and Supabase guidance supports the current source layout, private Storage model, and OIDC authentication route. It does not authorize a model request, a payment method, or removal of the managed rollback runtime; those remain owner-controlled decisions.

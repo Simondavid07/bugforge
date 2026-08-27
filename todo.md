@@ -146,10 +146,10 @@
 - [x] Configure Supabase GitHub OAuth for `bugforge-lyart.vercel.app`, deploy the callback flow, and verify the authenticated Vercel workspace route.
 - [ ] Establish compatible server-only external alternatives for managed Forge storage and AI, then verify attachments, personalization uploads, and AI recommendation drafts on Vercel.
 - [x] Replace managed Forge attachment/avatar/project-logo storage with a private Supabase Storage bucket, server-side project authorization, and short-lived signed URLs while keeping Storage closed to browser clients.
-- [ ] Identify a supported server-only external AI provider and configure the protected credentials required to retain BugForge recommendation drafts on Vercel.
+- [x] Identify Vercel AI Gateway as the supported server-only external AI provider and configure request-scoped OIDC routing without persisting an AI credential on Vercel.
 - [x] Review the user-authored GitHub OAuth with Supabase Auth implementation and confirm it is the deployed authentication design to preserve.
 - [x] Correct the workspace-deletion unavailable-database regression and validate the full type, test, Vercel-build, and managed-build suite.
 - [x] Reconcile the local direct-GitHub experiment without overwriting the user’s deployed Supabase Auth implementation, then complete a fresh live GitHub login verification.
 - [x] Correct personalization image persistence so a private Supabase Storage marker replaces the previous external avatar URL after successful upload.
 - [x] Hydrate authenticated private avatar markers to short-lived URLs before returning the browser-facing user profile.
-- [ ] Route production AI model discovery and recommendation drafts through Vercel AI Gateway using request-scoped OIDC, while retaining the managed Forge adapter only for rollback.
+- [x] Route production AI model discovery and recommendation drafts through Vercel AI Gateway using request-scoped OIDC, while retaining the managed Forge adapter only for rollback.

@@ -60,6 +60,9 @@ For local development, add the local callback URL to Supabase Auth’s redirect 
 
 [1]: https://supabase.com/docs/guides/auth/social-login/auth-github "Supabase: Login with GitHub"
 [2]: https://supabase.com/docs/reference/javascript/auth-signinwithoauth "Supabase JavaScript: signInWithOAuth"
+[3]: https://supabase.com/docs/guides/storage/security/access-control "Supabase Storage: Access control"
+[4]: https://supabase.com/docs/reference/javascript/storage-from-createsignedurl "Supabase Storage: Create signed URL"
+[5]: https://vercel.com/docs/ai-gateway/authentication-and-byok/oidc "Vercel AI Gateway: OIDC"
 
 Deployment note: the production commit is authored with the GitHub account canonical noreply email so Vercel can match the commit author.
 
@@ -75,4 +78,8 @@ The production workspace deletion feature is available at **Personalize → Work
 
 The `workspace.delete` transaction removes attachment rows before deleting their parent issues, so attachment database records cannot remain attached to an issue that the transaction successfully removes. A production audit found no attachment rows whose `issueId` points to a missing issue.
 
-The current storage abstraction exposes upload and signed-read helpers but no object-delete operation. Consequently, workspace deletion removes database references to attachment blobs but cannot physically delete the underlying storage objects through the supported application API. Those unreferenced objects are no longer reachable from BugForge; physical storage garbage collection would require a future storage capability or provider-level lifecycle policy. Project logo and avatar objects follow the same reference-removal boundary. The transaction also does not rewrite `userPreferences.projectOrder`; deleted project IDs may remain as harmless stale JSON entries and are filtered when the project list is rebuilt.
+The current storage adapter now supports upload, signed read, and object deletion against the private Supabase bucket. Existing workspace deletion still removes database references only; it does not yet call object deletion for every attachment/logo/avatar key inside the transaction, so unreferenced objects remain a lifecycle-cleanup concern. They are not available through a public bucket and can no longer be reached from BugForge once their database references are removed. Project logo and avatar updates follow the same replacement boundary. The transaction also does not rewrite `userPreferences.projectOrder`; deleted project IDs may remain as harmless stale JSON entries and are filtered when the project list is rebuilt.[3] [4]
+
+## External runtime boundary
+
+GitHub OAuth through Supabase Auth remains unchanged by the Storage and AI work. A fresh authenticated production avatar upload proved that the existing Supabase bearer-token/tRPC authorization path can write a private object and return a signed URL without exposing a Storage policy or service-role credential to the browser. The server-side AI adapter now receives Vercel’s short-lived Function OIDC token for the external AI Gateway. It keeps the existing structured recommendation schema and explicit human apply/dismiss flow; it does not add a direct GitHub credential to Vercel.[5]
