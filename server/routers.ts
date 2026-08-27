@@ -36,7 +36,7 @@ import {
   roleCan,
 } from "./db.js";
 import { invokeLLM, listLLMModels } from "./_core/llm.js";
-import { storagePut } from "./storage.js";
+import { resolveStorageUrl, storageGetSignedUrl, storagePut } from "./storage.js";
 import { COOKIE_NAME } from "../shared/const.js";
 import { getSessionCookieOptions } from "./_core/cookies.js";
 import { systemRouter } from "./_core/systemRouter.js";
@@ -190,7 +190,17 @@ export const appRouter = router({
             all.findIndex(other => other.id === project.id) === index
         )
         .sort((a, b) => a.name.localeCompare(b.name));
-      return { workspaces: memberships, projects: projectRows };
+      return {
+        workspaces: memberships,
+        projects: await Promise.all(
+          projectRows.map(async project => ({
+            ...project,
+            logoUrl:
+              (await resolveStorageUrl(project.logoKey ?? "", project.logoUrl)) ??
+              project.logoUrl,
+          })),
+        ),
+      };
     }),
     create: protectedProcedure
       .input(
@@ -887,7 +897,7 @@ export const appRouter = router({
       )[0];
       const user = (
         await db
-          .select({ avatarUrl: users.avatarUrl })
+          .select({ avatarUrl: users.avatarUrl, avatarKey: users.avatarKey })
           .from(users)
           .where(eq(users.id, ctx.user.id))
           .limit(1)
@@ -904,7 +914,9 @@ export const appRouter = router({
           projectOrder: [],
           savedSearches: [],
         }),
-        avatarUrl: user?.avatarUrl ?? null,
+        avatarUrl:
+          (await resolveStorageUrl(user?.avatarKey ?? "", user?.avatarUrl)) ??
+          null,
       };
     }),
     updatePreferences: protectedProcedure
@@ -999,7 +1011,11 @@ export const appRouter = router({
             .update(projects)
             .set({ logoKey: stored.key, logoUrl: stored.url })
             .where(eq(projects.id, input.projectId!));
-        return { success: true, key: stored.key, url: stored.url };
+        return {
+          success: true,
+          key: stored.key,
+          url: await storageGetSignedUrl(stored.key),
+        };
       }),
   }),
 
@@ -1100,7 +1116,11 @@ export const appRouter = router({
             sizeBytes: bytes.length,
           },
         });
-        return { attachmentId, fileName: safeName, storageUrl: stored.url };
+        return {
+          attachmentId,
+          fileName: safeName,
+          storageUrl: await storageGetSignedUrl(stored.key),
+        };
       }),
   }),
 

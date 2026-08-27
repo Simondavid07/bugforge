@@ -1,21 +1,7 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uploads via Forge Server presigned URL to S3 (PUT direct).
-// Downloads return /manus-storage/{key} paths served via 307 redirect.
-
 import { ENV } from "./_core/env.js";
 
-function getForgeConfig() {
-  const forgeUrl = ENV.forgeApiUrl;
-  const forgeKey = ENV.forgeApiKey;
-
-  if (!forgeUrl || !forgeKey) {
-    throw new Error(
-      "Storage config missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY",
-    );
-  }
-
-  return { forgeUrl: forgeUrl.replace(/\/+$/, ""), forgeKey };
-}
+const SUPABASE_STORAGE_URL_PREFIX = "supabase-storage://";
+const SIGNED_URL_TTL_SECONDS = 15 * 60;
 
 function normalizeKey(relKey: string): string {
   return relKey.replace(/^\/+/, "");
@@ -28,70 +14,118 @@ function appendHashSuffix(relKey: string): string {
   return `${relKey.slice(0, lastDot)}_${hash}${relKey.slice(lastDot)}`;
 }
 
+function getSupabaseStorageConfig() {
+  const serviceRoleKey = ENV.supabaseServiceRoleKey;
+  if (!serviceRoleKey) {
+    throw new Error(
+      "Storage config missing: set SUPABASE_SERVICE_ROLE_KEY for external storage.",
+    );
+  }
+  return {
+    projectUrl: ENV.supabaseUrl.replace(/\/+$/, ""),
+    serviceRoleKey,
+    bucket: ENV.supabaseStorageBucket,
+  };
+}
+
+function encodeObjectKey(key: string): string {
+  return normalizeKey(key)
+    .split("/")
+    .map(segment => encodeURIComponent(segment))
+    .join("/");
+}
+
+function storageMarker(bucket: string, key: string): string {
+  return `${SUPABASE_STORAGE_URL_PREFIX}${bucket}/${normalizeKey(key)}`;
+}
+
+export function isSupabaseStorageUrl(url: string | null | undefined): boolean {
+  return Boolean(url?.startsWith(SUPABASE_STORAGE_URL_PREFIX));
+}
+
 export async function storagePut(
   relKey: string,
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream",
 ): Promise<{ key: string; url: string }> {
-  const { forgeUrl, forgeKey } = getForgeConfig();
+  const { projectUrl, serviceRoleKey, bucket } = getSupabaseStorageConfig();
   const key = appendHashSuffix(normalizeKey(relKey));
-
-  // 1. Get presigned PUT URL from Forge
-  const presignUrl = new URL("v1/storage/presign/put", forgeUrl + "/");
-  presignUrl.searchParams.set("path", key);
-
-  const presignResp = await fetch(presignUrl, {
-    headers: { Authorization: `Bearer ${forgeKey}` },
-  });
-
-  if (!presignResp.ok) {
-    const msg = await presignResp.text().catch(() => presignResp.statusText);
-    throw new Error(`Storage presign failed (${presignResp.status}): ${msg}`);
+  const objectPath = encodeObjectKey(key);
+  const body = typeof data === "string" ? data : Buffer.from(data);
+  const response = await fetch(
+    `${projectUrl}/storage/v1/object/${encodeURIComponent(bucket)}/${objectPath}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": contentType,
+        "x-upsert": "false",
+      },
+      body,
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Supabase Storage upload failed (${response.status}).`);
   }
-
-  const { url: s3Url } = (await presignResp.json()) as { url: string };
-  if (!s3Url) throw new Error("Forge returned empty presign URL");
-
-  // 2. PUT file directly to S3
-  const blob =
-    typeof data === "string"
-      ? new Blob([data], { type: contentType })
-      : new Blob([data as any], { type: contentType });
-
-  const uploadResp = await fetch(s3Url, {
-    method: "PUT",
-    headers: { "Content-Type": contentType },
-    body: blob,
-  });
-
-  if (!uploadResp.ok) {
-    throw new Error(`Storage upload to S3 failed (${uploadResp.status})`);
-  }
-
-  return { key, url: `/manus-storage/${key}` };
+  return { key, url: storageMarker(bucket, key) };
 }
 
 export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
   const key = normalizeKey(relKey);
-  return { key, url: `/manus-storage/${key}` };
+  return { key, url: storageMarker(ENV.supabaseStorageBucket, key) };
 }
 
 export async function storageGetSignedUrl(relKey: string): Promise<string> {
-  const { forgeUrl, forgeKey } = getForgeConfig();
+  const { projectUrl, serviceRoleKey, bucket } = getSupabaseStorageConfig();
   const key = normalizeKey(relKey);
-
-  const getUrl = new URL("v1/storage/presign/get", forgeUrl + "/");
-  getUrl.searchParams.set("path", key);
-
-  const resp = await fetch(getUrl, {
-    headers: { Authorization: `Bearer ${forgeKey}` },
-  });
-
-  if (!resp.ok) {
-    const msg = await resp.text().catch(() => resp.statusText);
-    throw new Error(`Storage signed URL failed (${resp.status}): ${msg}`);
+  const response = await fetch(
+    `${projectUrl}/storage/v1/object/sign/${encodeURIComponent(bucket)}/${encodeObjectKey(key)}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ expiresIn: SIGNED_URL_TTL_SECONDS }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Supabase Storage signed URL failed (${response.status}).`);
   }
+  const payload = (await response.json()) as { signedURL?: string; signedUrl?: string };
+  const signedUrl = payload.signedURL ?? payload.signedUrl;
+  if (!signedUrl) throw new Error("Supabase Storage returned no signed URL.");
+  return new URL(
+    signedUrl.replace(/^\/+/, ""),
+    `${projectUrl}/storage/v1/`,
+  ).toString();
+}
 
-  const { url } = (await resp.json()) as { url: string };
-  return url;
+export async function resolveStorageUrl(
+  key: string,
+  storedUrl: string | null | undefined,
+): Promise<string | null> {
+  if (!storedUrl) return null;
+  return isSupabaseStorageUrl(storedUrl)
+    ? storageGetSignedUrl(key)
+    : storedUrl;
+}
+
+export async function storageDelete(relKey: string): Promise<void> {
+  const { projectUrl, serviceRoleKey, bucket } = getSupabaseStorageConfig();
+  const response = await fetch(
+    `${projectUrl}/storage/v1/object/${encodeURIComponent(bucket)}/${encodeObjectKey(relKey)}`,
+    {
+      method: "DELETE",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+    },
+  );
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`Supabase Storage deletion failed (${response.status}).`);
+  }
 }

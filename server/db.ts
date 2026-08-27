@@ -24,6 +24,7 @@ import {
 } from "../drizzle/schema.js";
 import * as schema from "../drizzle/schema.js";
 import { ENV } from "./_core/env.js";
+import { resolveStorageUrl } from "./storage.js";
 
 let _pool: Pool | null = null;
 let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
@@ -424,12 +425,20 @@ export async function fetchIssueDetail(userId: number, issueId: number) {
         .from(issues)
         .where(inArray(issues.id, linkedIds))
     : [];
+  const hydratedAttachments = await Promise.all(
+    attachmentRows.map(async attachment => ({
+      ...attachment,
+      storageUrl:
+        (await resolveStorageUrl(attachment.storageKey, attachment.storageUrl)) ??
+        attachment.storageUrl,
+    })),
+  );
   return {
     issue,
     labels: issueLabelRows,
     comments: commentRows,
     watchers: watcherRows,
-    attachments: attachmentRows,
+    attachments: hydratedAttachments,
     activity: activityRows,
     recommendations: recommendationRows,
     members: memberRows,
