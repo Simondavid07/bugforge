@@ -69,6 +69,8 @@ export type InvokeParams = {
   model?: string;
   thinking?: Record<string, unknown>;
   reasoning?: Record<string, unknown>;
+  /** A short-lived Vercel OIDC token from the active Function request. */
+  oidcToken?: string;
 };
 
 export type ToolCall = {
@@ -212,15 +214,42 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
-const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
+type ProviderCredentials = {
+  apiUrl: string;
+  token: string;
+  provider: "vercel-ai-gateway" | "managed-forge";
+};
 
-const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
-    throw new Error("OPENAI_API_KEY is not configured");
+const aiGatewayBaseUrl = () => ENV.aiGatewayUrl.replace(/\/$/, "");
+
+const resolveProviderCredentials = (
+  requestOidcToken?: string
+): ProviderCredentials => {
+  const oidcToken = requestOidcToken || ENV.vercelOidcToken;
+  if (oidcToken) {
+    return {
+      apiUrl: aiGatewayBaseUrl(),
+      token: oidcToken,
+      provider: "vercel-ai-gateway",
+    };
   }
+
+  // Keep the existing managed adapter usable as an explicit rollback path. The
+  // Vercel deployment intentionally receives no Forge credential, so it cannot
+  // take this branch in production.
+  if (ENV.forgeApiKey) {
+    return {
+      apiUrl: ENV.forgeApiUrl?.trim()
+        ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1`
+        : "https://forge.manus.im/v1",
+      token: ENV.forgeApiKey,
+      provider: "managed-forge",
+    };
+  }
+
+  throw new Error(
+    "No server-side AI credential is available. Vercel functions require the request-scoped Vercel OIDC token."
+  );
 };
 
 const normalizeResponseFormat = ({
@@ -340,8 +369,6 @@ const fetchWithBackoff = async (
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
-
   const {
     messages,
     tools,
@@ -356,7 +383,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     reasoning,
     maxTokens,
     max_tokens,
+    oidcToken,
   } = params;
+  const provider = resolveProviderCredentials(oidcToken);
 
   const payload: Record<string, unknown> = {
     messages: messages.map(normalizeMessage),
@@ -401,11 +430,11 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetchWithBackoff(resolveApiUrl(), {
+  const response = await fetchWithBackoff(`${provider.apiUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${provider.token}`,
     },
     body: JSON.stringify(payload),
   });
@@ -432,15 +461,13 @@ export type ModelsResponse = {
   data: ModelInfo[];
 };
 
-export async function listLLMModels(): Promise<ModelsResponse> {
-  assertApiKey();
+export async function listLLMModels(input?: {
+  oidcToken?: string;
+}): Promise<ModelsResponse> {
+  const provider = resolveProviderCredentials(input?.oidcToken);
 
-  const url = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/models`
-    : "https://forge.manus.im/v1/models";
-
-  const response = await fetchWithBackoff(url, {
-    headers: { authorization: `Bearer ${ENV.forgeApiKey}` },
+  const response = await fetchWithBackoff(`${provider.apiUrl}/models`, {
+    headers: { authorization: `Bearer ${provider.token}` },
   });
 
   if (!response.ok) {

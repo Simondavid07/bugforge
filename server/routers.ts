@@ -44,6 +44,10 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc.js";
 
 const projectIdInput = z.object({ projectId: z.number().int().positive() });
 const issueIdInput = z.object({ issueId: z.number().int().positive() });
+const requestOidcToken = (request: { headers?: Record<string, string | string[] | undefined> }) => {
+  const value = request.headers?.["x-vercel-oidc-token"];
+  return Array.isArray(value) ? value[0] : value;
+};
 const issueCreateInput = z.object({
   projectId: z.number().int().positive(),
   title: z.string().trim().min(4).max(250),
@@ -1165,10 +1169,11 @@ export const appRouter = router({
               .where(eq(issues.projectId, issue.projectId))
               .orderBy(desc(issues.updatedAt))
               .limit(25),
-            listLLMModels(),
+            listLLMModels({ oidcToken: requestOidcToken(ctx.req) }),
           ]
         );
         const model =
+          catalog.data.find(item => item.id === "openai/gpt-5-mini")?.id ??
           catalog.data.find(item => item.id === "gpt-5-mini")?.id ??
           catalog.data[0]?.id;
         if (!model)
@@ -1186,6 +1191,7 @@ export const appRouter = router({
         const prompt = `Project: ${project[0]?.name ?? "Unknown"}\nKnown labels: ${projectLabels.map(label => label.name).join(", ") || "none"}\n\nIssue #${issue.number}: ${issue.title}\nDescription: ${issue.description ?? "Not provided"}\nExpected: ${issue.expectedResult ?? "Not provided"}\nActual: ${issue.actualResult ?? "Not provided"}\nCurrent steps: ${issue.reproducibleSteps ?? "Not provided"}\nEnvironment: ${issue.environment ?? "Not provided"}\n\nPossible prior issues:\n${candidateText || "None"}`;
         const response = await invokeLLM({
           model,
+          oidcToken: requestOidcToken(ctx.req),
           messages: [
             {
               role: "system",
