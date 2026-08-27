@@ -100,7 +100,10 @@ export async function authenticateRequest(req: AuthenticatedRequest) {
     name: profileName(authUser),
     email,
     loginMethod: "github",
-    avatarUrl: profileAvatar(authUser),
+    // A provider avatar only seeds new BugForge accounts. Existing accounts may
+    // have a user-selected private image marker, which must not be replaced by
+    // concurrent or subsequent GitHub profile synchronizations.
+    ...(user ? {} : { avatarUrl: profileAvatar(authUser) }),
     lastSignedIn: new Date(),
   });
 
