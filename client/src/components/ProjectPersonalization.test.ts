@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { applyProjectAccent } from "./ProjectPersonalization";
+import {
+  applyProjectAccent,
+  normalizeProjectAccent,
+} from "./ProjectPersonalization";
 
 describe("applyProjectAccent", () => {
   it("applies a refreshed project accent to the workspace styling variable", () => {
@@ -14,5 +17,11 @@ describe("applyProjectAccent", () => {
     const root = { style: { setProperty } } as unknown as HTMLElement;
     expect(applyProjectAccent(null, root)).toBe(false);
     expect(setProperty).not.toHaveBeenCalled();
+  });
+
+  it("normalizes a valid custom color while rejecting malformed accent values", () => {
+    expect(normalizeProjectAccent("#75937e")).toBe("#75937E");
+    expect(normalizeProjectAccent("sage")).toBeNull();
+    expect(normalizeProjectAccent("#75937E00")).toBeNull();
   });
 });

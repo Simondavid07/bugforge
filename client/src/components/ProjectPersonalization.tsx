@@ -46,6 +46,10 @@ export function applyProjectAccent(
   return true;
 }
 
+export function normalizeProjectAccent(value: string) {
+  return /^#[0-9a-f]{6}$/i.test(value) ? value.toUpperCase() : null;
+}
+
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -64,6 +68,9 @@ export default function ProjectPersonalization() {
   const updatePreferences = trpc.personalization.updatePreferences.useMutation({
     onSuccess: () => utils.personalization.get.invalidate(),
   });
+  const [optimisticAccent, setOptimisticAccent] = useState<string | null>(
+    null
+  );
   const updateAccent = trpc.project.updateAccent.useMutation({
     onSuccess: async () => {
       await Promise.all([
@@ -106,7 +113,8 @@ export default function ProjectPersonalization() {
       }),
     [workspace?.projects, projectOrder]
   );
-  const accent = activeProject?.accentColor ?? "#A55343";
+  const savedAccent = activeProject?.accentColor ?? "#A55343";
+  const accent = optimisticAccent ?? savedAccent;
 
   useEffect(() => {
     document.documentElement.dataset.motion = motion;
@@ -114,7 +122,8 @@ export default function ProjectPersonalization() {
   }, [motion]);
   useEffect(() => {
     applyProjectAccent(activeProject?.accentColor, document.documentElement);
-  }, [activeProject?.accentColor]);
+    setOptimisticAccent(null);
+  }, [activeProject?.accentColor, projectId]);
   useEffect(() => {
     const menu = document.querySelector<HTMLElement>(
       "[data-slot='sidebar-menu']"
@@ -248,6 +257,23 @@ export default function ProjectPersonalization() {
     });
     event.target.value = "";
   };
+  const chooseAccent = (value: string) => {
+    if (!projectId) return;
+    const nextAccent = normalizeProjectAccent(value);
+    if (!nextAccent) return;
+    const previousAccent = activeProject?.accentColor;
+    setOptimisticAccent(nextAccent);
+    applyProjectAccent(nextAccent, document.documentElement);
+    updateAccent.mutate(
+      { projectId, accentColor: nextAccent },
+      {
+        onError: () => {
+          setOptimisticAccent(null);
+          applyProjectAccent(previousAccent, document.documentElement);
+        },
+      }
+    );
+  };
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(
       ".project-personalization"
@@ -355,30 +381,43 @@ export default function ProjectPersonalization() {
             </p>
           ) : (
             <p className="mt-1 text-[11px] text-[#665D56] dark:text-[#C9BEB4]">
-              Applies to {activeProject?.name ?? "this project"}. Project admins
-              can update its mark.
+              Applies to {activeProject?.name ?? "this project"}. Choose a swatch
+              or open the color picker; project admins can save the change.
             </p>
           )}
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2" role="group" aria-label="Project accent choices">
             {accents.map(color => (
               <button
+                type="button"
                 key={color}
                 disabled={!projectId || updateAccent.isPending}
                 aria-label={`Use ${color} as project accent`}
-                onClick={() =>
-                  projectId &&
-                  updateAccent.mutate({ projectId, accentColor: color })
-                }
-                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-transparent ring-offset-2 transition hover:scale-110 disabled:opacity-50"
+                aria-pressed={accent === color}
+                onClick={() => chooseAccent(color)}
+                className="project-accent-swatch flex h-9 w-9 items-center justify-center rounded-full border-2 border-transparent ring-offset-2 transition hover:scale-110 disabled:opacity-50"
                 style={{
                   backgroundColor: color,
                   ...(accent === color ? { borderColor: "#1E1A18" } : {}),
                 }}
               >
-                {accent === color && <Check className="h-4 w-4 text-white" />}
+                {accent === color && <Check className="project-accent-check h-4 w-4" />}
               </button>
             ))}
+            <label className="project-accent-picker flex h-9 min-w-9 cursor-pointer items-center justify-center rounded-full border-2 border-dashed border-[#665D56] px-1.5 text-[10px] font-semibold text-[#1E1A18] dark:border-[#C9BEB4] dark:text-[#F4EEE6]">
+              <span className="sr-only">Choose a custom project accent color</span>
+              <Palette className="h-3.5 w-3.5" aria-hidden="true" />
+              <input
+                type="color"
+                value={accent}
+                disabled={!projectId || updateAccent.isPending}
+                aria-label="Choose a custom project accent color"
+                onChange={event => chooseAccent(event.target.value)}
+              />
+            </label>
           </div>
+          <p className="mt-2 text-[10px] font-medium text-[#665D56] dark:text-[#C9BEB4]">
+            Current accent: <span className="font-mono text-[#1E1A18] dark:text-[#F4EEE6]">{accent}</span>
+          </p>
           {updateAccent.error && (
             <p role="alert" className="mt-2 text-xs text-[#A55343]">
               {updateAccent.error.message}
