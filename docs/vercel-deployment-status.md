@@ -1,20 +1,20 @@
 # Vercel deployment status
 
-**Last checked:** 26 August 2026
+**Last checked:** 27 August 2026
 
 | Item | Status |
 |---|---|
 | Team | `davidsimon7873-4146's projects` (`team_NDe4yP0FtJ1QaohLAPLK8FLp`) |
 | Project | `bugforge` (`prj_etdzqiHKGxrzIhsoUIeInQtW7LwU`) |
 | Git repository | Private `Simondavid07/bugforge` repository on `main` |
-| Current production deployment | **Ready** — `AiZd2t9T1SwmSBXzbXjhrXhQV5NR`, source commit `fdd74c5` |
+| Current production deployment | **Ready** — `3wcDfqLkHku1qgjEeJ9dfw1cGkQR`, source commit `9043622` (`fix: guard unavailable workspace deletion database`). |
 | Stable production URL | [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app) |
-| Unique production URL | [https://bugforge-8e4ke7f5f-davidsimon7873-4146s-projects.vercel.app](https://bugforge-8e4ke7f5f-davidsimon7873-4146s-projects.vercel.app) |
+| Unique production URL | [https://bugforge-b78dnkbmn-davidsimon7873-4146s-projects.vercel.app](https://bugforge-b78dnkbmn-davidsimon7873-4146s-projects.vercel.app) |
 | Database conversion | Completed and validated against dedicated Supabase PostgreSQL through a server-only transaction pooler. |
 | Vercel database proof | Both production URLs returned HTTP 200 and `{"ok":true,"database":"connected"}` from `system.health` after the Supabase password reset, Vercel secret rotation, and redeployment. |
 | API routing proof | The stable URL returned HTTP 200 and the expected JSON-null unauthenticated result from `auth.me`. |
-| Protected values | `SUPABASE_DATABASE_URL` was rotated for Production and Preview. `JWT_SECRET` is present for Production and Preview. OAuth application settings are configured; the server-side OAuth endpoint is Production-only. |
-| OAuth status | **Blocked by allowed redirect-domain configuration.** Manus OAuth rejects `bugforge-lyart.vercel.app` as an invalid redirect URI. |
+| Protected values | `SUPABASE_DATABASE_URL` remains rotated for Production and Preview. GitHub OAuth client credentials are held by Supabase Auth; no GitHub client secret is added to BugForge source or browser configuration. |
+| OAuth status | **Verified.** GitHub OAuth uses the Supabase callback and returns through the Vercel SPA PKCE callback route. A fresh browser review found a signed-in Supabase Auth session and the authorized BugForge workspace. |
 | Forge storage and AI | Not transferred to Vercel and not verified externally. |
 
 ## Compatible deployment layout
@@ -25,7 +25,7 @@ Vercel emits one Node function for the API catch-all. The reachable server impor
 
 ## What remains before calling the Vercel site fully usable
 
-The Vercel root URL can begin login, but selecting the authenticated account returns the provider error `invalid redirect_uri: redirect_uri domain 'bugforge-lyart.vercel.app' not allowed for this project`. The OAuth application must allowlist the stable Vercel domain before authenticated workspace, issue, personalization, desktop, and mobile flows can be verified on that origin. This is an external identity-provider configuration boundary; it is not corrected by hardcoding the domain in source code.
+The Vercel root URL now presents **Continue with GitHub** to anonymous users and renders the authorized workspace after the Supabase Auth PKCE callback completes. The GitHub App’s authorization callback is intentionally the Supabase Auth callback, while Supabase returns the browser to the allowlisted Vercel SPA route `/auth/callback`.[3] [4] This replaces the prior Manus redirect-domain constraint; a temporary direct-GitHub callback change made during inspection was restored before final validation.
 
 Managed Forge storage and AI keys were intentionally not copied to the third-party deployment. Attachments, custom logos/avatars, and AI recommendation flows therefore remain managed-runtime capabilities until a compatible server-only external implementation is established and separately tested.
 
@@ -35,3 +35,5 @@ Managed Forge storage and AI keys were intentionally not copied to the third-par
 
 [1]: https://vercel.com/docs/routing/rewrites "Vercel: Rewrites"
 [2]: https://vercel.com/kb/guide/using-express-with-vercel "Vercel: Using Express.js with Vercel"
+[3]: https://supabase.com/docs/guides/auth/social-login/auth-github "Supabase: Login with GitHub"
+[4]: https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession "Supabase JavaScript: exchangeCodeForSession"

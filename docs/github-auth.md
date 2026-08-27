@@ -46,6 +46,12 @@ Workspace deletion is now available in the Personalize → Workspace settings pa
 
 The latest production build completed successfully. Runtime logs showed successful authenticated requests and no application exception. Vercel still reports Node’s `DEP0169` `url.parse()` deprecation warning from the Express 4 request-parser dependency; it is non-fatal and unrelated to authentication. The optional Umami analytics placeholders were moved into conditional application bootstrap code, so builds without analytics variables no longer emit the previous unresolved-placeholder warnings.
 
+## Reconciliation review
+
+On 27 August 2026, the GitHub OAuth App, Supabase Auth flow, Vercel workspace, source branch, PostgreSQL health route, and full project validation suite were re-reviewed. The GitHub App’s homepage remained `https://bugforge-lyart.vercel.app`, and its callback was confirmed and restored as the Supabase Auth callback shown above. A fresh browser session at the stable Vercel URL displayed the authenticated `Simondavid07` workspace and confirmed only the presence—not the value—of the persisted Supabase Auth session. Independent public requests continued to return `{"ok":true,"database":"connected"}` from `system.health` and JSON null for an unauthenticated `auth.me` request.
+
+The review also corrected a workspace-deletion regression test so that the unavailable-database case passes an explicit `null` test dependency rather than accidentally using an initialized live connection. TypeScript, all 29 Vitest assertions, the Vercel build, and the managed rollback build passed after this correction. The Vercel bundle warning remains advisory: the Supabase client increases the entry bundle to approximately 961 kB uncompressed and 274 kB gzip.
+
 ## Local development
 
 For local development, add the local callback URL to Supabase Auth’s redirect allowlist and register the corresponding local callback with the GitHub OAuth application if local GitHub sign-in is needed. The production configuration must remain pointed at the Vercel callback above.
