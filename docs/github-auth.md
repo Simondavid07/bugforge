@@ -62,7 +62,6 @@ For local development, add the local callback URL to Supabase Auth’s redirect 
 [2]: https://supabase.com/docs/reference/javascript/auth-signinwithoauth "Supabase JavaScript: signInWithOAuth"
 [3]: https://supabase.com/docs/guides/storage/security/access-control "Supabase Storage: Access control"
 [4]: https://supabase.com/docs/reference/javascript/storage-from-createsignedurl "Supabase Storage: Create signed URL"
-[5]: https://vercel.com/docs/ai-gateway/authentication-and-byok/oidc "Vercel AI Gateway: OIDC"
 
 Deployment note: the production commit is authored with the GitHub account canonical noreply email so Vercel can match the commit author.
 
@@ -82,4 +81,4 @@ The current storage adapter now supports upload, signed read, and object deletio
 
 ## External runtime boundary
 
-GitHub OAuth through Supabase Auth remains unchanged by the Storage and AI work. A fresh authenticated production avatar upload proved that the existing Supabase bearer-token/tRPC authorization path can write a private object and return a signed URL without exposing a Storage policy or service-role credential to the browser. The server-side AI adapter now receives Vercel’s short-lived Function OIDC token for the external AI Gateway. It keeps the existing structured recommendation schema and explicit human apply/dismiss flow; it does not add a direct GitHub credential to Vercel.[5]
+GitHub OAuth through Supabase Auth remains unchanged by the Storage work. A fresh authenticated production avatar upload proved that the existing Supabase bearer-token/tRPC authorization path can write a private object and return a signed URL without exposing a Storage policy or service-role credential to the browser. The existing AI recommendation path was intentionally left unchanged and no external AI service, credential, funding configuration, or billable request was added. This does not add a direct GitHub credential to Vercel.

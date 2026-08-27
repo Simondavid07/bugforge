@@ -7,7 +7,7 @@ BugForge has completed its **Supabase PostgreSQL runtime conversion** and has a 
 | Check | Result |
 |---|---|
 | TypeScript | Passed after the PostgreSQL schema, Drizzle driver, conflict-target, and `returning()` conversion. |
-| Regression suite | **35 Vitest assertions passed**, including authorization, preferences, saved-search routing, accent behavior, serverless route recovery, system-health behavior, Supabase Storage round-trip, Vercel OIDC AI routing, and the live Supabase connection test. |
+| Regression suite | The complete Vitest suite passed, including authorization, preferences, saved-search routing, accent behavior, serverless route recovery, system-health behavior, the Supabase Storage round-trip, and the live Supabase connection test. |
 | Builds | `pnpm build:vercel` and `pnpm build:managed` both passed. The latter confirms the managed rollback artifact remains buildable. |
 | Supabase database | The isolated project `zznvjtdspjampmztrunx` connects through the server-only shared transaction pooler after the latest password rotation. |
 | Vercel production | Deployment `dpl_9PiW675zW8hrotWTid4z3USnShov`, source commit `a1e3fa7`, is **Ready**. The stable domain remains [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app), and its safe health probe continues to succeed. |
@@ -15,7 +15,7 @@ BugForge has completed its **Supabase PostgreSQL runtime conversion** and has a 
 | Supabase security advisor | RLS-disabled errors are resolved. Informational default-deny “RLS enabled, no policy” notices remain by design because browser-side Data API access is not used. |
 | External OAuth | **Verified.** The live Vercel browser session is signed in through GitHub OAuth with Supabase Auth and renders the authorized Orbit Labs / Web Console workspace. |
 | Private Supabase Storage | **Verified.** Vercel Production and Preview hold the protected server-only Storage configuration. A real authenticated avatar upload persisted a private object marker and rendered through a 15-minute signed URL. |
-| External AI | **Deployed, live generation pending.** Vercel Functions use request-scoped OIDC for AI Gateway’s OpenAI-compatible strict-JSON interface. No long-lived AI key was retained; an owner must enable model-request funding before one authorized live draft can be tested. |
+| External AI | **Intentionally unchanged.** The existing managed AI recommendation path retains its strict JSON output and human-review workflow. No Vercel AI Gateway configuration, funding, credential, or live external model request was added. |
 
 ## Database runtime and security model
 
@@ -31,11 +31,11 @@ Vercel serves Vite’s static output and dispatches `/api/*` through `api/[...pa
 
 The production URL is [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app). A fresh browser review observed the live signed-in `Simondavid07` workspace, the `WEB — Web Console` project, and a Supabase Auth session marker without exposing a token value. The GitHub OAuth App callback is correctly registered with Supabase Auth, and Supabase’s allowlisted post-login URL is `https://bugforge-lyart.vercel.app/auth/callback`.[5] [6]
 
-For AI drafts, the Vercel Function reads the request-scoped OIDC token provided by Vercel and calls AI Gateway’s OpenAI-compatible model catalog and completion endpoints. The adapter selects the documented current `openai/gpt-5-mini` identifier when available, retains the strict JSON Schema output, and leaves the existing explicit apply/dismiss human-review boundary unchanged. Vercel documents both OIDC Function authentication and strict JSON Schema responses for this interface.[8] [9]
+The existing AI recommendation implementation remains available through the managed runtime and retains its strict JSON Schema output plus the explicit apply/dismiss human-review boundary. The external Vercel configuration deliberately does not add a model provider, a long-lived provider key, model-request funding, or any new billing dependency.
 
 ## Rollback and cutover policy
 
-The managed MySQL/TiDB deployment remains the rollback path and must be retained until the authenticated Vercel flow continues to succeed through normal use, core issue-management routes have been reviewed at desktop and mobile widths, and the outstanding funded live AI draft test has passed. If the external runtime regresses before that cutover decision, use the managed deployment rather than attempting to reverse the Supabase migration or delete the database.
+The managed MySQL/TiDB deployment remains the rollback path and must be retained until the authenticated Vercel flow continues to succeed through normal use and core issue-management routes have been reviewed at desktop and mobile widths. If the external runtime regresses before that cutover decision, use the managed deployment rather than attempting to reverse the Supabase migration or delete the database. External AI activation is a separate, owner-controlled decision rather than a readiness prerequisite.
 
 ## Bundle audit
 
@@ -50,5 +50,3 @@ Route-level loading continues to defer individual page modules, the command pale
 [5]: https://vercel.com/docs/functions/runtimes/node-js "Vercel: Node.js runtime"
 [6]: https://supabase.com/docs/guides/auth/social-login/auth-github "Supabase: Login with GitHub"
 [7]: https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession "Supabase JavaScript: exchangeCodeForSession"
-[8]: https://vercel.com/docs/ai-gateway/authentication-and-byok/oidc "Vercel AI Gateway: OIDC"
-[9]: https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/structured-outputs "Vercel AI Gateway: Structured Outputs"

@@ -129,7 +129,7 @@
 - [x] Migrate authorized BugForge data into Supabase and verify row-level integrity without altering Lock Note data.
 - [x] Configure Vercel runtime environment and deploy the converted application from the private GitHub repository.
 - [x] Verify the live Vercel deployment, Supabase database connection, GitHub authentication path, and core workspace routes.
-- [ ] Preserve rollback instructions, checkpoint the migration, and report the verified deployment URL and database status.
+- [x] Preserve rollback instructions, checkpoint the migration, and report the verified deployment URL and database status.
 - [x] Diagnose the GitHub authorization 404 and establish a working Vercel link for the private BugForge repository.
 - [x] Diagnose Vercel’s repository-preparation failure and, if unresolved, use an explicit direct-deployment fallback.
 - [x] Replace the unsafe Vercel output with a compatible serverless API/static deployment architecture before resuming production traffic.
@@ -144,12 +144,14 @@
 - [x] Rotate the dedicated Supabase credential in protected local, Vercel Production, and Vercel Preview configuration, then redeploy production.
 - [x] Verify the unique and stable Vercel production health endpoints return HTTP 200 with `database: connected` and confirm the unauthenticated tRPC contract remains JSON rather than a routing failure.
 - [x] Configure Supabase GitHub OAuth for `bugforge-lyart.vercel.app`, deploy the callback flow, and verify the authenticated Vercel workspace route.
-- [ ] Establish compatible server-only external alternatives for managed Forge storage and AI, then verify attachments, personalization uploads, and AI recommendation drafts on Vercel.
+- [x] Complete the user-directed external boundary: verify private Supabase Storage while retaining the working managed AI recommendation path without provider funding or external AI activation.
 - [x] Replace managed Forge attachment/avatar/project-logo storage with a private Supabase Storage bucket, server-side project authorization, and short-lived signed URLs while keeping Storage closed to browser clients.
-- [x] Identify Vercel AI Gateway as the supported server-only external AI provider and configure request-scoped OIDC routing without persisting an AI credential on Vercel.
+- [x] Evaluate and deliberately remove the optional Vercel AI Gateway path, retaining the user’s working managed AI recommendation flow with no external AI billing or credentials.
 - [x] Review the user-authored GitHub OAuth with Supabase Auth implementation and confirm it is the deployed authentication design to preserve.
 - [x] Correct the workspace-deletion unavailable-database regression and validate the full type, test, Vercel-build, and managed-build suite.
 - [x] Reconcile the local direct-GitHub experiment without overwriting the user’s deployed Supabase Auth implementation, then complete a fresh live GitHub login verification.
 - [x] Correct personalization image persistence so a private Supabase Storage marker replaces the previous external avatar URL after successful upload.
 - [x] Hydrate authenticated private avatar markers to short-lived URLs before returning the browser-facing user profile.
-- [x] Route production AI model discovery and recommendation drafts through Vercel AI Gateway using request-scoped OIDC, while retaining the managed Forge adapter only for rollback.
+- [x] Trial and remove the optional Vercel AI Gateway/OIDC adapter, restoring the previously working managed AI adapter by user direction.
+- [x] Leave external AI model invocation disabled pending explicit owner direction; do not add a payment method, enable funding, create an AI Gateway key, or submit a live recommendation test.
+- [x] Remove the optional Vercel AI Gateway/OIDC adapter and restore the previously working managed AI adapter without altering GitHub Supabase Auth or private Storage.
