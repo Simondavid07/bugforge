@@ -143,7 +143,16 @@ const recommendationSchema = {
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query(async opts => {
+      const user = opts.ctx.user;
+      if (!user) return null;
+      return {
+        ...user,
+        avatarUrl:
+          (await resolveStorageUrl(user.avatarKey ?? "", user.avatarUrl)) ??
+          user.avatarUrl,
+      };
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       ctx.res.clearCookie(COOKIE_NAME, {
         ...getSessionCookieOptions(ctx.req),

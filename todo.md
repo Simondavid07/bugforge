@@ -151,3 +151,4 @@
 - [x] Correct the workspace-deletion unavailable-database regression and validate the full type, test, Vercel-build, and managed-build suite.
 - [x] Reconcile the local direct-GitHub experiment without overwriting the user’s deployed Supabase Auth implementation, then complete a fresh live GitHub login verification.
 - [ ] Correct personalization image persistence so a private Supabase Storage marker replaces the previous external avatar URL after successful upload.
+- [ ] Hydrate authenticated private avatar markers to short-lived URLs before returning the browser-facing user profile.
