@@ -155,4 +155,4 @@
 - [x] Trial and remove the optional Vercel AI Gateway/OIDC adapter, restoring the previously working managed AI adapter by user direction.
 - [x] Leave external AI model invocation disabled pending explicit owner direction; do not add a payment method, enable funding, create an AI Gateway key, or submit a live recommendation test.
 - [x] Remove the optional Vercel AI Gateway/OIDC adapter and restore the previously working managed AI adapter without altering GitHub Supabase Auth or private Storage.
-- [ ] Fix low-contrast workflow-status cards and make project accent color selection visibly editable, persistent, and accessible.
+- [x] Fix low-contrast workflow-status cards and make project accent color selection visibly editable, persistent, and accessible.
