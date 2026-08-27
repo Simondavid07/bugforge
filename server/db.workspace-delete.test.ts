@@ -131,6 +131,6 @@ describe("deleteWorkspace transaction", () => {
   });
 
   it("does not start a transaction when the database is unavailable", async () => {
-    await expect(deleteWorkspace(7)).rejects.toThrow("database unavailable");
+    await expect(deleteWorkspace(7, null)).rejects.toThrow("database unavailable");
   });
 });
