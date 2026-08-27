@@ -10,7 +10,7 @@ BugForge has completed its **Supabase PostgreSQL runtime conversion** and has a 
 | Regression suite | The complete Vitest suite passed, including authorization, preferences, saved-search routing, accent behavior, serverless route recovery, system-health behavior, the Supabase Storage round-trip, and the live Supabase connection test. |
 | Builds | `pnpm build:vercel` and `pnpm build:managed` both passed. The latter confirms the managed rollback artifact remains buildable. |
 | Supabase database | The isolated project `zznvjtdspjampmztrunx` connects through the server-only shared transaction pooler after the latest password rotation. |
-| Vercel production | Deployment `dpl_9PiW675zW8hrotWTid4z3USnShov`, source commit `a1e3fa7`, is **Ready**. The stable domain remains [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app), and its safe health probe continues to succeed. |
+| Vercel production | Deployment `dpl_2ahhu3wfLofHhhKGEZcoTo8zw4Jn`, source commit `967e462`, is **Ready**. The stable domain remains [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app), and its safe health probe continues to succeed. |
 | Vercel tRPC boundary | `https://bugforge-lyart.vercel.app/api/trpc/auth.me` returned HTTP 200 and the expected unauthenticated JSON-null result. |
 | Supabase security advisor | RLS-disabled errors are resolved. Informational default-deny “RLS enabled, no policy” notices remain by design because browser-side Data API access is not used. |
 | External OAuth | **Verified.** The live Vercel browser session is signed in through GitHub OAuth with Supabase Auth and renders the authorized Orbit Labs / Web Console workspace. |

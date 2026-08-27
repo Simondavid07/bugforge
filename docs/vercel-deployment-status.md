@@ -7,9 +7,9 @@
 | Team | `davidsimon7873-4146's projects` (`team_NDe4yP0FtJ1QaohLAPLK8FLp`) |
 | Project | `bugforge` (`prj_etdzqiHKGxrzIhsoUIeInQtW7LwU`) |
 | Git repository | Private `Simondavid07/bugforge` repository on `main` |
-| Current production deployment | **Ready** — `dpl_AcuW6sQtxZnpnDvvxm2K4FEk8ADX`, source commit `8932158` (`docs: record external storage and AI readiness`). The next deployment restores the managed-only AI adapter by user direction. |
+| Current production deployment | **Ready** — `dpl_2ahhu3wfLofHhhKGEZcoTo8zw4Jn`, source commit `967e462` (`revert: keep AI recommendations managed`). |
 | Stable production URL | [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app) |
-| Unique production URL | [https://bugforge-qdtcyc8nv-davidsimon7873-4146s-projects.vercel.app](https://bugforge-qdtcyc8nv-davidsimon7873-4146s-projects.vercel.app) |
+| Unique production URL | [https://bugforge-ixwwzghdh-davidsimon7873-4146s-projects.vercel.app](https://bugforge-ixwwzghdh-davidsimon7873-4146s-projects.vercel.app) |
 | Database conversion | Completed and validated against dedicated Supabase PostgreSQL through a server-only transaction pooler. |
 | Vercel database proof | Earlier stable and unique production health checks returned HTTP 200 with `{"ok":true,"database":"connected"}`; the latest ready deployment also passed the safe, non-sensitive health probe. |
 | API routing proof | The stable URL returned HTTP 200 and the expected JSON-null unauthenticated result from `auth.me`. |
