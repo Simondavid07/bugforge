@@ -147,4 +147,4 @@
 - [ ] Establish compatible server-only external alternatives for managed Forge storage and AI, then verify attachments, personalization uploads, and AI recommendation drafts on Vercel.
 - [x] Review the user-authored GitHub OAuth with Supabase Auth implementation and confirm it is the deployed authentication design to preserve.
 - [x] Correct the workspace-deletion unavailable-database regression and validate the full type, test, Vercel-build, and managed-build suite.
-- [ ] Reconcile the local direct-GitHub experiment without overwriting the user’s deployed Supabase Auth implementation, then complete a fresh live GitHub login verification.
+- [x] Reconcile the local direct-GitHub experiment without overwriting the user’s deployed Supabase Auth implementation, then complete a fresh live GitHub login verification.
