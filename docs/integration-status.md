@@ -1,50 +1,28 @@
 # Integration status
 
-**Last verified:** 27 August 2026
+**Last verified:** 28 August 2026
 
-BugForge now runs against its isolated **Supabase PostgreSQL** project through the server-only `SUPABASE_DATABASE_URL` transaction-pooler secret. A fresh database-password rotation was applied to the dedicated BugForge project and its protected local, Vercel Production, and Vercel Preview credentials were updated. No credential is included in this repository, in client configuration, or in this document.
+BugForge’s external production runtime uses the isolated Supabase PostgreSQL project created for BugForge. GitHub OAuth is mediated by Supabase Auth, new files use private Supabase Storage, Vercel hosts the external build, and the managed deployment remains the rollback path. The selected GitHub repository is `Simondavid07/bugforge` on `main`; repository visibility should be reviewed independently of application secret safety.
 
-| Area | Verified state | Remaining action |
-|---|---|---|
-| Application database runtime | Drizzle now uses `node-postgres` and PostgreSQL table definitions. MySQL duplicate-key operations and insert-ID assumptions are replaced with explicit PostgreSQL conflict targets and `returning()` IDs. | Maintain PostgreSQL parity for future schema changes. |
-| Dedicated Supabase project | **BugForge**, ref `zznvjtdspjampmztrunx`, region `ap-south-1`, PostgreSQL 17. The migrated records match the authorized MySQL snapshot. | Keep Lock Note’s separate `clonefest-2` project untouched. |
-| Server-only connectivity | The live connection test executed `SELECT 1` with the freshly rotated transaction-pooler credential. | Rotate the secret through Supabase, Manus, and Vercel together whenever the password changes. |
-| Vercel database health | Production deployment `dpl_2ahhu3wfLofHhhKGEZcoTo8zw4Jn`, source commit `967e462`, is **Ready**. The stable production health probe continues to complete successfully without returning connection details. | Keep the health route free of connection details and continue monitoring through platform logs. |
-| Vercel API routing | The stable domain returned HTTP 200 with the expected unauthenticated `auth.me` JSON-null contract rather than a source file, 404, or function error. | Preserve the API catch-all rewrite and original-path restoration when editing routing. |
-| Authentication | **Verified on Vercel.** GitHub OAuth is mediated through Supabase Auth. The GitHub App callback is `https://zznvjtdspjampmztrunx.supabase.co/auth/v1/callback`; Supabase returns to the allowlisted Vercel SPA route `/auth/callback`, which completes the PKCE exchange. A fresh live browser review showed the signed-in `Simondavid07` workspace and stored Supabase Auth session. | Retain the GitHub App/Supabase redirect configuration and re-run the authenticated smoke test after identity changes. |
-| Private file storage | **Verified on Vercel.** The private `bugforge-private` Supabase Storage bucket accepts server-authorized uploads and produces 15-minute signed reads. An authenticated avatar upload stored a `supabase-storage://` database marker and rendered through a signed URL; no Storage browser policy or service-role key was exposed. | Add lifecycle cleanup for superseded/deleted-object keys in a later maintenance pass. |
-| AI recommendation boundary | The existing managed Forge AI recommendation behavior is intentionally unchanged. No Vercel AI Gateway credential, funding configuration, or live external model request is configured. The strict schema and `pending_review` gate remain unchanged. | Leave external AI activation owner-controlled; do not add billing or provider configuration unless explicitly requested. |
-| Security hardening | RLS is enabled on all BugForge public-schema tables. `public.set_updated_at()` has a fixed `pg_catalog` search path. The latest advisor reports only the expected informational default-deny notices for tables with RLS and no browser Data API policies, plus Supabase Auth’s independent leaked-password-protection warning. | Do not expose Supabase Data API or service-role credentials to the frontend. Enable leaked-password protection if password sign-in is introduced. |
-| GitHub source control | The private [`Simondavid07/bugforge`](https://github.com/Simondavid07/bugforge) repository remains linked to Vercel on `main`. | Push this final non-secret documentation and validation record after the secret audit. |
+| Area                       | Verified state                                                                                                                                                        | Operating boundary                                                                             |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| PostgreSQL runtime         | Drizzle uses `pg` and PostgreSQL definitions through the Supabase transaction pooler.                                                                                 | Preserve schema parity for future migrations.                                                  |
+| Dedicated Supabase project | BugForge project ref `zznvjtdspjampmztrunx`, region `ap-south-1`, PostgreSQL 17.                                                                                      | Keep Lock Note project `clonefest-2` untouched.                                                |
+| Database health            | Server-only `SELECT 1` health test and production health probe succeeded.                                                                                             | Do not return connection details or driver errors publicly.                                    |
+| Vercel                     | Stable production URL: [bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app). Latest verified deployment from GitHub `main` is Ready.                        | Preserve the API catch-all and SPA fallback routing.                                           |
+| Authentication             | GitHub OAuth through Supabase Auth with PKCE; Supabase callback `https://zznvjtdspjampmztrunx.supabase.co/auth/v1/callback`; Vercel post-auth route `/auth/callback`. | Keep provider credentials in Supabase Auth, never in source or browser bundles.                |
+| Private Storage            | `bugforge-private` is private. Server-authorized avatar, logo, and attachment writes store markers and return short-lived signed reads.                               | Do not add permissive browser Storage policies or expose the service-role key.                 |
+| Project personalization    | Project admins can persist hex accents; the authenticated Web Console project was verified at sage `#75937E`.                                                         | Continue validating values server-side and keep UI feedback accessible.                        |
+| AI recommendations         | Existing managed Forge workflow remains unchanged, structured, and human-reviewed.                                                                                    | Do not activate external AI funding, keys, or live requests without a separate owner decision. |
+| Security                   | BugForge public tables have RLS enabled and the timestamp trigger search path is hardened.                                                                            | Application RBAC remains required; RLS is defense in depth.                                    |
+| Rollback                   | Managed MySQL/TiDB deployment and data remain available.                                                                                                              | Do not delete or reverse either database as a first response to an application incident.       |
 
-## Runtime validation
+## Validation evidence
 
-The final local validation suite passed TypeScript checking, the complete Vitest suite, the Vercel build, and the managed-runtime build. Focused tests cover a real private Storage upload/sign/read/delete round-trip, the read-only bucket inventory, and private marker hydration. The focused `server/supabase.connection.test.ts` also passed after the password rotation and confirms the configured server-only URI can execute a lightweight PostgreSQL health query. The managed runtime was not replaced or deleted; it remains the verified rollback environment.
-
-The public Vercel verification intentionally used only safe, read-only requests. `system.health` performs a `SELECT 1` and reports the coarse states `connected` or `unavailable`; it does not return a host, user, password, or driver error. The serverless runtime uses the Supabase shared transaction pooler, the documented connection mode for temporary and serverless clients.[1]
-
-## Authentication and external-runtime boundary
-
-The external deployment now uses the user-configured **GitHub OAuth with Supabase Auth** flow, not Manus end-user OAuth. The client initiates GitHub sign-in through Supabase, then exchanges the returned PKCE code exactly once at the public `/auth/callback` SPA route. The tRPC transport forwards the short-lived Supabase access token in an Authorization header; the server obtains the Supabase identity server-side and resolves it to the existing BugForge user record. Existing workspace membership is therefore preserved by a confirmed-email match rather than by replacing access-control tables.[2] [3]
-
-The prior Manus `invalid redirect_uri` finding is closed for this deployment path. During reconciliation, the GitHub OAuth App callback was restored to the Supabase Auth callback after a temporary direct-GitHub inspection change; the GitHub App’s homepage remains the stable Vercel URL. No GitHub client secret is stored in BugForge source, documentation, Git history, or frontend configuration.
-
-> The managed MySQL/TiDB deployment and its data are deliberately retained as rollback infrastructure. Do not remove or overwrite them until external OAuth, authenticated workspace routes, and any required external storage/AI alternatives are verified.
-
-## External storage boundary
-
-The Storage cutover is server-mediated. After BugForge’s own workspace/project authorization succeeds, the server writes to the private `bugforge-private` bucket with its server-only service-role credential. Database records retain a non-public marker rather than a permanent object URL; read paths exchange the marker for a 15-minute signed URL only after authorization. This matches Supabase’s private-bucket and signed-URL model while keeping the service-role credential outside the browser.[4] [5]
-
-The existing recommendation workflow remains in the managed runtime with its project-membership checks, strict JSON Schema output, and human-reviewable `pending_review` draft status. No external AI provider, Vercel AI key, model funding, or production AI request was configured during this milestone. This avoids changing a working feature or introducing a billing dependency without a separate owner decision.
-
-## Project accent behavior
-
-The authenticated **Orbit Labs / Web Console** workspace retains its sage `#75937E` accent after the PostgreSQL conversion. The server validates the hex value and project-admin membership before persisting an update.
+The complete TypeScript check, Vitest suite, Vercel build, and managed build passed during the final application milestones. Focused verification covered Supabase PostgreSQL connectivity, private Storage upload/sign/read/delete behavior, authenticated avatar marker hydration, GitHub/Supabase Auth, project-accent persistence, and the production workboard. No credentials are recorded in this document.
 
 ## References
 
-[1]: https://supabase.com/docs/guides/database/connecting-to-postgres "Supabase: Connect to your database"
-[2]: https://supabase.com/docs/guides/auth/social-login/auth-github "Supabase: Login with GitHub"
-[3]: https://supabase.com/docs/reference/javascript/auth-exchangecodeforsession "Supabase JavaScript: exchangeCodeForSession"
-[4]: https://supabase.com/docs/guides/storage/security/access-control "Supabase Storage: Access control"
-[5]: https://supabase.com/docs/reference/javascript/storage-from-createsignedurl "Supabase Storage: Create signed URL"
+[1]: https://supabase.com/docs/guides/auth/social-login/auth-github "Supabase Auth GitHub provider"
+[2]: https://supabase.com/docs/guides/storage/security/access-control "Supabase Storage access control"
+[3]: https://supabase.com/docs/guides/database/connecting-to-postgres "Supabase PostgreSQL connections"

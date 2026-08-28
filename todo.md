@@ -156,3 +156,7 @@
 - [x] Leave external AI model invocation disabled pending explicit owner direction; do not add a payment method, enable funding, create an AI Gateway key, or submit a live recommendation test.
 - [x] Remove the optional Vercel AI Gateway/OIDC adapter and restore the previously working managed AI adapter without altering GitHub Supabase Auth or private Storage.
 - [x] Fix low-contrast workflow-status cards and make project accent color selection visibly editable, persistent, and accessible.
+- [x] Complete the root README as a submission-ready BugForge overview with product scope, feature map, architecture, setup, and usage.
+- [x] Add comprehensive GitHub documentation for authentication, database migration, storage, deployment, security, testing, contribution, troubleshooting, and rollback.
+- [x] Cross-check every documentation claim against the source tree, verified test/build evidence, Vercel deployment, and Supabase configuration before synchronizing to GitHub.
+- [x] Commit and push the complete documentation set to the selected GitHub repository.
