@@ -5,6 +5,7 @@ This directory contains the detailed product, engineering, security, deployment,
 | Guide                                                        | Purpose                                                                                             |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | [`architecture.md`](architecture.md)                         | Runtime topology, domain model, RBAC, workflow, authentication, Storage, and deployment boundaries. |
+| [`visuals.md`](visuals.md)                                     | GitHub-rendered architecture, authentication, Storage, lifecycle diagrams, and source-derived chart. |
 | [`api.md`](api.md)                                           | tRPC namespaces, access expectations, Storage responses, and AI draft contract.                     |
 | [`setup.md`](setup.md)                                       | Prerequisites, installation, protected configuration, development loop, and safe data practices.    |
 | [`github-auth.md`](github-auth.md)                           | GitHub OAuth through Supabase Auth, PKCE callback contract, and verification.                       |

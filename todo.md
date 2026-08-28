@@ -160,3 +160,7 @@
 - [x] Add comprehensive GitHub documentation for authentication, database migration, storage, deployment, security, testing, contribution, troubleshooting, and rollback.
 - [x] Cross-check every documentation claim against the source tree, verified test/build evidence, Vercel deployment, and Supabase configuration before synchronizing to GitHub.
 - [x] Commit and push the complete documentation set to the selected GitHub repository.
+- [x] Add verified architecture, authentication, Storage, and issue-lifecycle diagrams to the GitHub documentation.
+- [x] Add evidence-based documentation charts using only real repository validation data and clearly label their scope.
+- [x] Validate visual assets, Markdown references, accessibility text, and rendered documentation before pushing the documentation polish to GitHub.
+- [x] Commit and push the visual documentation upgrade to the selected GitHub repository.
