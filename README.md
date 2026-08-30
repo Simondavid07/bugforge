@@ -25,6 +25,22 @@ A signed-in user enters a workspace overview that surfaces the next useful actio
 
 The visual system uses warm paper, deep ink, terracotta, rose, sage, and dusty-gold accents with editorial serif display type and a quiet sans-serif interface. Motion is restrained, keyboard reachable, and reduced-motion aware. The interface is designed to feel composed at both desktop and mobile widths rather than treating responsive behavior as a later adaptation.
 
+### Product tour
+
+The following captures are owner-provided interface evidence from the implemented BugForge workspace. They show the same product language across light and dark themes, including the Overview, five-stage Workboard, and Insights health surface. The empty values are intentionally preserved from the captured workspace and do not represent production usage metrics.
+
+| Overview — dark appearance | Overview — light appearance |
+| --- | --- |
+| [![BugForge Overview in dark appearance](docs/assets/product-tour/overview-dark.png)](docs/assets/product-tour/overview-dark.png) | [![BugForge Overview in light appearance](docs/assets/product-tour/overview-light.png)](docs/assets/product-tour/overview-light.png) |
+| Deep ink surfaces, readable pastel status cards, Quick find, New issue, project context, and Personalize. | Paper surfaces, high-contrast ink, semantic pastel status cards, and the same workspace hierarchy. |
+
+| Workboard — light appearance | Insights — dark appearance |
+| --- | --- |
+| [![BugForge Workboard in light appearance](docs/assets/product-tour/workboard-light.png)](docs/assets/product-tour/workboard-light.png) | [![BugForge Insights in dark appearance](docs/assets/product-tour/insights-dark.png)](docs/assets/product-tour/insights-dark.png) |
+| Five workflow lanes: **Intake**, **Triage**, **In progress**, **Verify**, and **Done**. | Project-health summary with open issues, resolved work, release attention, severity mix, and aging lanes. |
+
+For route-level captions, source-file mapping, accessibility notes, and screenshot limitations, see the complete [`docs/product-tour.md`](docs/product-tour.md). For the system relationships behind these screens, see [`docs/visuals.md`](docs/visuals.md).
+
 ## Architecture
 
 BugForge is a monorepo-style TypeScript application with a React/Vite client and an Express/tRPC server. The server exposes typed procedures under `/api/trpc`; Drizzle ORM maps the domain model to PostgreSQL; Supabase Auth supplies the end-user identity boundary; Supabase Storage stores private image and attachment bytes; Vercel hosts the external production build; and the managed runtime remains available as rollback.

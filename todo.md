@@ -174,3 +174,7 @@
 - [x] Add a captioned product-tour section mapping Overview, theme states, Workboard, and Insights to implemented routes and source components.
 - [x] Validate screenshot assets, GitHub-relative Markdown links, captions, rendering, and repository synchronization.
 - [x] Commit, push, and checkpoint the screenshot documentation update.
+
+- [x] Embed the four provided product screenshots directly in the root README.md with polished captions and theme labels.
+- [x] Validate README-relative image links, documentation navigation, type check, and tests after embedding the gallery.
+- [x] Push the README screenshot gallery update to GitHub and save a checkpoint.
