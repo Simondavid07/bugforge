@@ -140,6 +140,34 @@ The repository uses TypeScript, Vitest, and Playwright. Tests cover authorizatio
 
 The latest verified milestone includes a ready Vercel production deployment, an authenticated GitHub/Supabase session, PostgreSQL connectivity, a successful private avatar upload and signed read, persistent project accent selection, the full TypeScript check, and the complete Vitest suite. AI recommendations remain human-reviewed and the external Vercel AI Gateway is intentionally not activated.
 
+## Judging rubric evidence map
+
+This matrix is a practical evaluator map, not a claim of guaranteed marks. Each row identifies the strongest demonstration path and the repository evidence that supports it. The full six-category rubric assessment and the measured performance record are maintained in [`docs/performance-evidence.md`](docs/performance-evidence.md) and [`docs/evaluator-demo.md`](docs/evaluator-demo.md).
+
+| Rubric category | Strongest demonstration | Repository evidence | Remaining scoring risk |
+| --- | --- | --- | --- |
+| **Problem understanding & core functionality — 20** | Create a structured issue, assign it, move it through the five workflow states, comment, watch, link, and inspect it in Boards and Insights. | [`docs/architecture.md`](docs/architecture.md), [`client/src/pages/IssueExplorer.tsx`](client/src/pages/IssueExplorer.tsx), [`client/src/pages/IssueDetail.tsx`](client/src/pages/IssueDetail.tsx), [`server/routers.ts`](server/routers.ts) | A judge needs to see a populated flow, not only empty-state screenshots. |
+| **Innovation & meaningful differentiation — 20** | Show the editorial correspondence visual system, keyboard command palette, project personalization, private Storage, and reviewable AI drafts. | [`docs/product-tour.md`](docs/product-tour.md), [`docs/visuals.md`](docs/visuals.md), [`client/src/components/CommandPalette.tsx`](client/src/components/CommandPalette.tsx) | Explain why each innovation improves issue work instead of listing features. |
+| **Technical implementation & architecture — 15** | Explain the browser → Vercel API → RBAC → Drizzle/PostgreSQL/Storage boundary and the managed rollback path. | [`docs/visuals.md`](docs/visuals.md), [`drizzle/schema.ts`](drizzle/schema.ts), [`server/_core/context.ts`](server/_core/context.ts), [`server/storage.ts`](server/storage.ts) | Keep provider responsibilities and rollback boundaries precise. |
+| **UX & accessibility — 15** | Toggle light/dark themes, use Quick find with keyboard, adjust motion, demonstrate visible focus, and show the responsive shell. | [`docs/product-tour.md`](docs/product-tour.md), [`docs/performance-evidence.md`](docs/performance-evidence.md), [`client/src/index.css`](client/src/index.css) | A live keyboard and reduced-motion demonstration is stronger than screenshots alone. |
+| **Performance, reliability & demo quality — 20** | Run the evaluator walkthrough, show a populated synthetic dataset, then show build, test, health, and bundle evidence. | [`docs/evaluator-demo.md`](docs/evaluator-demo.md), [`docs/performance-evidence.md`](docs/performance-evidence.md), [`docs/testing.md`](docs/testing.md) | The current artifact has a documented large shared chunk; field performance is not claimed. |
+| **Documentation & explanation — 10** | Walk from this README to the product tour, system graph, evaluator dataset, architecture, security, testing, deployment, and rollback pages. | [`docs/README.md`](docs/README.md), [`docs/visuals.md`](docs/visuals.md), [`docs/product-tour.md`](docs/product-tour.md) | Keep the final submission links and screenshots in the public repository. |
+
+## Evaluator runbook
+
+Use the following order for a concise, repeatable demonstration. The records described in the runbook are synthetic and must be labeled as such; do not imply that they represent real customers, real production traffic, or real team performance. The fixture is intended for a non-production staging workspace; it is not an automatic production seed.
+
+1. Start at the authenticated Overview and identify the selected project, Quick find, New issue, status summary, and Personalize controls.
+2. If a staging workspace has been populated from [`docs/evaluator-demo.md`](docs/evaluator-demo.md), open an Intake issue and show its structured report fields.
+3. Assign the issue, move it to Triage, and open Workboard to show the five visible lifecycle lanes.
+4. Add a comment or watcher, open the activity context, and show how collaboration remains attached to the issue.
+5. Open the release-blocker example and connect its status to the Overview and Insights signals.
+6. Open the AI recommendation example, explain the draft state, and demonstrate that applying it requires an explicit human decision.
+7. Open Personalize to show project accent, theme, motion, ordering, and private image controls.
+8. Finish with the architecture graph, test result, build evidence, and rollback explanation rather than ending on a static screenshot.
+
+For the exact fixture fields and the data-safety boundary, see [`docs/evaluator-demo.md`](docs/evaluator-demo.md). For measured artifact evidence and its limitations, see [`docs/performance-evidence.md`](docs/performance-evidence.md).
+
 ## Security boundaries
 
 BugForge follows least privilege at the application boundary. Every project procedure resolves membership and role on the server. Private Storage has no permissive browser policy; the service-role key is server-only. The browser receives only short-lived signed URLs after authorization. Public system health exposes connection status but not credentials or data. RLS is enabled on the exposed Supabase public tables as defense in depth, while the application continues to use the server-side database connection for typed, authorized access.

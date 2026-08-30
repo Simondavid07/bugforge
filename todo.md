@@ -178,3 +178,12 @@
 - [x] Embed the four provided product screenshots directly in the root README.md with polished captions and theme labels.
 - [x] Validate README-relative image links, documentation navigation, type check, and tests after embedding the gallery.
 - [x] Push the README screenshot gallery update to GitHub and save a checkpoint.
+
+- [x] Assess BugForge against the six-category 100-mark judging rubric using repository evidence, tests, deployment records, and screenshots.
+- [x] Produce a realistic category-by-category score range and identify high-impact submission gaps.
+- [x] Prepare a concise evaluator checklist and prioritize any final feature or demo improvements worth adding.
+
+- [x] Add an explicitly labeled synthetic BugForge demo workspace/data path for evaluator walkthroughs without implying real customer activity.
+- [x] Generate measured performance and accessibility evidence from the production build and document the methodology and limitations.
+- [x] Add a rubric-to-evidence matrix and evaluator runbook directly to README.md; no video deliverable is planned.
+- [x] Validate the improvements, synchronize them to GitHub, and save a final checkpoint.

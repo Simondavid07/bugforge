@@ -1,0 +1,96 @@
+{
+  "datasetName": "BugForge evaluator demo",
+  "synthetic": true,
+  "purpose": "Local or staging walkthrough data only; never production customer activity.",
+  "workspace": {
+    "name": "Northstar Demo Workspace",
+    "slug": "northstar-demo",
+    "project": {
+      "name": "Web Console",
+      "key": "WEB",
+      "accentColor": "#A55343"
+    }
+  },
+  "issues": [
+    {
+      "key": "WEB-101",
+      "title": "Keyboard focus is lost after saving a saved search",
+      "status": "intake",
+      "severity": "major",
+      "priority": "high",
+      "labels": ["accessibility", "navigation"],
+      "releaseBlocker": false,
+      "demoPurpose": "Create and triage flow"
+    },
+    {
+      "key": "WEB-102",
+      "title": "Project accent preview does not announce the selected color",
+      "status": "triage",
+      "severity": "minor",
+      "priority": "medium",
+      "labels": ["accessibility", "personalization"],
+      "releaseBlocker": false,
+      "demoPurpose": "Role-aware project settings"
+    },
+    {
+      "key": "WEB-103",
+      "title": "Release blocker banner remains visible after verification",
+      "status": "in_progress",
+      "severity": "critical",
+      "priority": "urgent",
+      "labels": ["release", "regression"],
+      "releaseBlocker": true,
+      "demoPurpose": "Release-risk signal"
+    },
+    {
+      "key": "WEB-104",
+      "title": "Attachment download should return an expiring authorized URL",
+      "status": "verify",
+      "severity": "major",
+      "priority": "high",
+      "labels": ["security", "storage"],
+      "releaseBlocker": false,
+      "demoPurpose": "Private Storage and verification"
+    },
+    {
+      "key": "WEB-105",
+      "title": "Duplicate reports should preserve the original issue link",
+      "status": "done",
+      "severity": "minor",
+      "priority": "low",
+      "labels": ["workflow", "duplicates"],
+      "releaseBlocker": false,
+      "demoPurpose": "Resolution and issue links"
+    },
+    {
+      "key": "WEB-106",
+      "title": "Insights aging lane uses the project timezone consistently",
+      "status": "done",
+      "severity": "major",
+      "priority": "medium",
+      "labels": ["analytics", "dates"],
+      "releaseBlocker": false,
+      "demoPurpose": "Analytics and completed work"
+    },
+    {
+      "key": "WEB-107",
+      "title": "Human-reviewed summary draft omits the environment field",
+      "status": "triage",
+      "severity": "major",
+      "priority": "medium",
+      "labels": ["ai-review", "reproducibility"],
+      "releaseBlocker": false,
+      "demoPurpose": "AI draft review gate"
+    },
+    {
+      "key": "WEB-108",
+      "title": "Watcher notification should identify the changed status",
+      "status": "intake",
+      "severity": "minor",
+      "priority": "low",
+      "labels": ["notifications", "collaboration"],
+      "releaseBlocker": false,
+      "demoPurpose": "Collaboration and Inbox"
+    }
+  ]
+}

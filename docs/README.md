@@ -9,6 +9,8 @@ For a fast technical orientation, begin with [`visuals.md`](visuals.md). It is t
 | [`architecture.md`](architecture.md)                         | Runtime topology, domain model, RBAC, workflow, authentication, Storage, and deployment boundaries. |
 | [`visuals.md`](visuals.md)                                     | Primary system documentation graph: boundaries, request flow, Auth, data model, RBAC, lifecycle, Storage, deployment, API inventory, and traceability. |
 | [`product-tour.md`](product-tour.md)                           | Owner-provided Overview, Workboard, and Insights screenshots with route captions and implementation traceability. |
+| [`evaluator-demo.md`](evaluator-demo.md)                       | Clearly labeled synthetic walkthrough dataset and evaluator runbook; no production data is implied.           |
+| [`performance-evidence.md`](performance-evidence.md)           | Reproducible Vercel build, bundle, route-chunk, accessibility, and verification evidence.                     |
 | [`api.md`](api.md)                                           | tRPC namespaces, access expectations, Storage responses, and AI draft contract.                     |
 | [`setup.md`](setup.md)                                       | Prerequisites, installation, protected configuration, development loop, and safe data practices.    |
 | [`github-auth.md`](github-auth.md)                           | GitHub OAuth through Supabase Auth, PKCE callback contract, and verification.                       |
@@ -24,4 +26,4 @@ For a fast technical orientation, begin with [`visuals.md`](visuals.md). It is t
 | [`production-readiness.md`](production-readiness.md)         | Release checklist and evidence boundary.                                                            |
 | [`vercel-deployment-status.md`](vercel-deployment-status.md) | Vercel project and production verification record.                                                  |
 
-The recommended review order is [`README.md`](../README.md) → [`product-tour.md`](product-tour.md) for interface evidence → [`visuals.md`](visuals.md) for system structure → [`architecture.md`](architecture.md) for implementation detail → the focused operational guides. Historical design records remain in this directory to preserve the evolution of BugForge’s visual direction.
+The recommended review order is [`README.md`](../README.md) → [`product-tour.md`](product-tour.md) for interface evidence → [`evaluator-demo.md`](evaluator-demo.md) for the populated walkthrough plan → [`visuals.md`](visuals.md) for system structure → [`architecture.md`](architecture.md) for implementation detail → [`performance-evidence.md`](performance-evidence.md) for measured release evidence → the focused operational guides. Historical design records remain in this directory to preserve the evolution of BugForge’s visual direction.
