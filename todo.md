@@ -169,3 +169,8 @@
 - [x] Upgrade the GitHub documentation index and README navigation so the graph documentation is easy to discover and understand.
 - [x] Validate the revised diagrams, chart data, Markdown links, documentation claims, type check, and test suite before synchronizing the upgrade.
 - [x] Commit, push, and checkpoint the proper GitHub documentation graph upgrade.
+
+- [x] Add the four user-provided product screenshots to a versioned GitHub documentation asset set.
+- [x] Add a captioned product-tour section mapping Overview, theme states, Workboard, and Insights to implemented routes and source components.
+- [x] Validate screenshot assets, GitHub-relative Markdown links, captions, rendering, and repository synchronization.
+- [x] Commit, push, and checkpoint the screenshot documentation update.

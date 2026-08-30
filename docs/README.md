@@ -8,6 +8,7 @@ For a fast technical orientation, begin with [`visuals.md`](visuals.md). It is t
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | [`architecture.md`](architecture.md)                         | Runtime topology, domain model, RBAC, workflow, authentication, Storage, and deployment boundaries. |
 | [`visuals.md`](visuals.md)                                     | Primary system documentation graph: boundaries, request flow, Auth, data model, RBAC, lifecycle, Storage, deployment, API inventory, and traceability. |
+| [`product-tour.md`](product-tour.md)                           | Owner-provided Overview, Workboard, and Insights screenshots with route captions and implementation traceability. |
 | [`api.md`](api.md)                                           | tRPC namespaces, access expectations, Storage responses, and AI draft contract.                     |
 | [`setup.md`](setup.md)                                       | Prerequisites, installation, protected configuration, development loop, and safe data practices.    |
 | [`github-auth.md`](github-auth.md)                           | GitHub OAuth through Supabase Auth, PKCE callback contract, and verification.                       |
@@ -23,4 +24,4 @@ For a fast technical orientation, begin with [`visuals.md`](visuals.md). It is t
 | [`production-readiness.md`](production-readiness.md)         | Release checklist and evidence boundary.                                                            |
 | [`vercel-deployment-status.md`](vercel-deployment-status.md) | Vercel project and production verification record.                                                  |
 
-The recommended review order is [`README.md`](../README.md) → [`visuals.md`](visuals.md) → [`architecture.md`](architecture.md) → the focused operational guides. Historical design records remain in this directory to preserve the evolution of BugForge’s visual direction.
+The recommended review order is [`README.md`](../README.md) → [`product-tour.md`](product-tour.md) for interface evidence → [`visuals.md`](visuals.md) for system structure → [`architecture.md`](architecture.md) for implementation detail → the focused operational guides. Historical design records remain in this directory to preserve the evolution of BugForge’s visual direction.

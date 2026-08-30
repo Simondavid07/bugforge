@@ -21,6 +21,10 @@ flowchart TB
   T --> P[docs/production-readiness.md\nrelease checklist]
   P --> E[docs/deployment.md\nVercel operations]
   R --> M[docs/demo-script.md\nevaluator walkthrough]
+  R --> U[docs/product-tour.md\nscreenshot evidence]
+  U --> O[Overview states]
+  U --> W[Workboard]
+  U --> I[Insights]
 ```
 
 | Reader question | Primary document | Evidence anchor |
@@ -31,6 +35,7 @@ flowchart TB
 | How are files protected? | [`storage.md`](storage.md) | `server/storage.ts`, `server/routers.ts` |
 | How do issue permissions work? | [`security.md`](security.md), [`architecture.md`](architecture.md) | `server/_core/trpc.ts`, `server/routers.ts` |
 | How was the implementation verified? | [`testing.md`](testing.md) | `server/*.test.ts`, `client/src/**/*.test.ts` |
+| What does the implemented product look like? | [`product-tour.md`](product-tour.md) | Owner-provided Overview, Workboard, and Insights captures |
 
 ## 2. System context and trust boundaries
 

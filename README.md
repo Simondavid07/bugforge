@@ -136,7 +136,7 @@ See [`docs/security.md`](docs/security.md) and [`docs/troubleshooting.md`](docs/
 
 BugForge addresses the challenge of reconstructing the essential developer workflow behind Bugzilla without reproducing its legacy interface. The implementation demonstrates an independent product interpretation with a modern stack, clear domain boundaries, project-scoped RBAC, collaborative issue intelligence, analytics, personalization, responsive interaction design, and honest AI review controls.
 
-See [`docs/submission-ready-brief.md`](docs/submission-ready-brief.md) for a concise evaluation-oriented summary, [`docs/architecture.md`](docs/architecture.md) for system design, [`docs/visuals.md`](docs/visuals.md) for diagrams and the procedure chart, and [`docs/demo-script.md`](docs/demo-script.md) for a suggested walkthrough.
+See [`docs/submission-ready-brief.md`](docs/submission-ready-brief.md) for a concise evaluation-oriented summary, [`docs/product-tour.md`](docs/product-tour.md) for owner-provided interface screenshots, [`docs/architecture.md`](docs/architecture.md) for system design, [`docs/visuals.md`](docs/visuals.md) for diagrams and the procedure chart, and [`docs/demo-script.md`](docs/demo-script.md) for a suggested walkthrough.
 
 ## Contributing
 
