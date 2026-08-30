@@ -164,3 +164,8 @@
 - [x] Add evidence-based documentation charts using only real repository validation data and clearly label their scope.
 - [x] Validate visual assets, Markdown references, accessibility text, and rendered documentation before pushing the documentation polish to GitHub.
 - [x] Commit and push the visual documentation upgrade to the selected GitHub repository.
+
+- [x] Rework GitHub documentation visuals into a proper evaluator-ready documentation graph with legends, boundaries, traceability, and clear explanatory captions.
+- [x] Upgrade the GitHub documentation index and README navigation so the graph documentation is easy to discover and understand.
+- [x] Validate the revised diagrams, chart data, Markdown links, documentation claims, type check, and test suite before synchronizing the upgrade.
+- [x] Commit, push, and checkpoint the proper GitHub documentation graph upgrade.

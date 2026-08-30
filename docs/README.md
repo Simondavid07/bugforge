@@ -2,10 +2,12 @@
 
 This directory contains the detailed product, engineering, security, deployment, and evaluation records for BugForge.
 
+For a fast technical orientation, begin with [`visuals.md`](visuals.md). It is the repository’s **system documentation graph**: it maps trust boundaries, request flow, authentication, relational entities, RBAC decisions, issue lifecycle, private file handling, deployment rollback, API surface, and source-to-feature traceability. Each graph is paired with a legend, implementation anchor, or evidence table so reviewers can move from the picture to the code.
+
 | Guide                                                        | Purpose                                                                                             |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | [`architecture.md`](architecture.md)                         | Runtime topology, domain model, RBAC, workflow, authentication, Storage, and deployment boundaries. |
-| [`visuals.md`](visuals.md)                                     | GitHub-rendered architecture, authentication, Storage, lifecycle diagrams, and source-derived chart. |
+| [`visuals.md`](visuals.md)                                     | Primary system documentation graph: boundaries, request flow, Auth, data model, RBAC, lifecycle, Storage, deployment, API inventory, and traceability. |
 | [`api.md`](api.md)                                           | tRPC namespaces, access expectations, Storage responses, and AI draft contract.                     |
 | [`setup.md`](setup.md)                                       | Prerequisites, installation, protected configuration, development loop, and safe data practices.    |
 | [`github-auth.md`](github-auth.md)                           | GitHub OAuth through Supabase Auth, PKCE callback contract, and verification.                       |
@@ -21,4 +23,4 @@ This directory contains the detailed product, engineering, security, deployment,
 | [`production-readiness.md`](production-readiness.md)         | Release checklist and evidence boundary.                                                            |
 | [`vercel-deployment-status.md`](vercel-deployment-status.md) | Vercel project and production verification record.                                                  |
 
-Historical design records remain in this directory to preserve the evolution of BugForge’s visual direction. The root [`README.md`](../README.md) is the recommended first read.
+The recommended review order is [`README.md`](../README.md) → [`visuals.md`](visuals.md) → [`architecture.md`](architecture.md) → the focused operational guides. Historical design records remain in this directory to preserve the evolution of BugForge’s visual direction.
