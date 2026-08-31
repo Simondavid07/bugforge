@@ -168,6 +168,29 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, isVercelBuild ? "dist" : "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "wouter"],
+          "ui-vendor": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-avatar",
+            "@radix-ui/react-checkbox",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-select",
+          ],
+          "trpc-vendor": [
+            "@trpc/client",
+            "@trpc/react-query",
+            "@tanstack/react-query",
+            "superjson",
+          ],
+          "icons-vendor": ["lucide-react"],
+        },
+      },
+    },
   },
   server: {
     host: true,

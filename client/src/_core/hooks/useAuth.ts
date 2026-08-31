@@ -10,10 +10,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function useAuth() {
   const utils = trpc.useUtils();
-  const [sessionReady, setSessionReady] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
   const [demoPersona, setDemoPersona] = useState<string | null>(() =>
     getActiveDemoPersona()
+  );
+  const [sessionReady, setSessionReady] = useState(() =>
+    Boolean(getActiveDemoPersona())
+  );
+  const [signedIn, setSignedIn] = useState(() =>
+    Boolean(getActiveDemoPersona())
   );
 
   const meQuery = trpc.auth.me.useQuery(undefined, {

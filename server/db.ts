@@ -825,6 +825,9 @@ export async function ensureDemoPersonaUser(personaKey: string): Promise<typeof 
             set: { role: persona.projectRole },
           });
       }
+      if (wsProjects[0]) {
+        await seedEnterpriseDataset(wsProjects[0].id, user.id, 100);
+      }
     }
   } else {
     const { projectId } = await createWorkspaceWithProject({
@@ -833,7 +836,7 @@ export async function ensureDemoPersonaUser(personaKey: string): Promise<typeof 
       projectName: "Web Console",
       projectKey: "WEB",
     });
-    await seedDemoIssues(db, projectId, user.id);
+    await seedEnterpriseDataset(projectId, user.id, 100);
   }
 
   return user;
@@ -961,7 +964,7 @@ export async function seedEnterpriseDataset(
     "invalid",
   ];
 
-  const insertedIds: number[] = [];
+  const issueBatch: Array<typeof issues.$inferInsert> = [];
 
   for (let i = 0; i < toGenerate; i++) {
     const num = startNumber + i;
@@ -974,48 +977,56 @@ export async function seedEnterpriseDataset(
       status === "done" ? resolutions[i % resolutions.length] : null;
     const isBlocker = cat.severity === "blocker" || i % 12 === 0;
 
-    const [created] = await db
-      .insert(issues)
-      .values({
-        projectId,
-        number: num,
-        title,
-        description: `Comprehensive diagnostic record for: ${titleBase}. Identified during continuous integration test suite run across distributed test runners.`,
-        expectedResult:
-          "Operation executes within strict SLA bounds with zero data loss and clean error boundaries.",
-        actualResult: `Observed regression in environment: ${cat.prefix}. Stack trace captured in telemetry logs.`,
-        reproducibleSteps: `1. Authenticate with project role.\n2. Trigger high-concurrency workload matching ${cat.prefix}.\n3. Observe telemetry anomaly under load test.`,
-        environment: `Production Cluster / Node.js 24 / PostgreSQL 16 (${cat.prefix})`,
-        severity: isBlocker ? "blocker" : cat.severity,
-        priority: cat.priority,
-        status,
-        resolution,
-        reporterId: userId,
-        assigneeId: userId,
-        isReleaseBlocker: isBlocker,
-        triagedAt:
-          status !== "intake"
-            ? new Date(Date.now() - i * 3600000)
-            : null,
-        resolvedAt:
-          status === "done" ? new Date(Date.now() - i * 1800000) : null,
-      })
-      .returning({ id: issues.id });
-
-    if (created) insertedIds.push(created.id);
+    issueBatch.push({
+      projectId,
+      number: num,
+      title,
+      description: `Comprehensive diagnostic record for: ${titleBase}. Identified during continuous integration test suite run across distributed test runners.`,
+      expectedResult:
+        "Operation executes within strict SLA bounds with zero data loss and clean error boundaries.",
+      actualResult: `Observed regression in environment: ${cat.prefix}. Stack trace captured in telemetry logs.`,
+      reproducibleSteps: `1. Authenticate with project role.\n2. Trigger high-concurrency workload matching ${cat.prefix}.\n3. Observe telemetry anomaly under load test.`,
+      environment: `Production Cluster / Node.js 24 / PostgreSQL 16 (${cat.prefix})`,
+      severity: isBlocker ? "blocker" : cat.severity,
+      priority: cat.priority,
+      status,
+      resolution,
+      reporterId: userId,
+      assigneeId: userId,
+      isReleaseBlocker: isBlocker,
+      triagedAt:
+        status !== "intake"
+          ? new Date(Date.now() - i * 3600000)
+          : null,
+      resolvedAt:
+        status === "done" ? new Date(Date.now() - i * 1800000) : null,
+    });
   }
 
-  // Create realistic DAG dependencies across generated issues
+  // 1 single lightning-fast batch insert
+  const createdRows = await db
+    .insert(issues)
+    .values(issueBatch)
+    .returning({ id: issues.id });
+
+  const insertedIds = createdRows.map(r => r.id);
+
+  // 1 single batch insert for dependency links
+  const linkBatch: Array<typeof issueLinks.$inferInsert> = [];
   for (let i = 0; i < insertedIds.length - 2; i += 3) {
     const sourceId = insertedIds[i]!;
     const targetId = insertedIds[i + 1]!;
+    linkBatch.push({
+      issueId: sourceId,
+      linkedIssueId: targetId,
+      type: "blocks",
+      createdById: userId,
+    });
+  }
+
+  if (linkBatch.length > 0) {
     try {
-      await db.insert(issueLinks).values({
-        issueId: sourceId,
-        linkedIssueId: targetId,
-        type: "blocks",
-        createdById: userId,
-      });
+      await db.insert(issueLinks).values(linkBatch);
     } catch {
       // Ignore link conflicts
     }
