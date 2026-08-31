@@ -25,7 +25,9 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
   if (typeof window === "undefined") return;
   if (error.message !== UNAUTHED_ERR_MSG) return;
-  void startLogin();
+  if (!getSupabaseAccessToken()?.startsWith("demo:")) {
+    void startLogin();
+  }
 };
 
 queryClient.getQueryCache().subscribe(event => {

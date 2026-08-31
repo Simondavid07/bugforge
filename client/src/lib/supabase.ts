@@ -30,22 +30,25 @@ export function setDemoPersonaToken(personaKey: string | null) {
       localStorage.setItem(DEMO_PERSONA_STORAGE_KEY, `demo:${personaKey}`);
       accessToken = `demo:${personaKey}`;
     } else {
-      localStorage.removeItem(DEMO_PERSONA_STORAGE_KEY);
+      localStorage.setItem(DEMO_PERSONA_STORAGE_KEY, "none");
       accessToken = null;
     }
   }
 }
 
 export function getActiveDemoPersona(): string | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return "admin";
   const stored = localStorage.getItem(DEMO_PERSONA_STORAGE_KEY);
-  return stored && stored.startsWith("demo:") ? stored.slice(5) : null;
+  if (stored === "none") return null;
+  if (stored && stored.startsWith("demo:")) return stored.slice(5);
+  // Default to instant Carol (Admin) demo persona
+  return "admin";
 }
 
 export function getSupabaseAccessToken() {
   if (typeof window !== "undefined") {
-    const demo = localStorage.getItem(DEMO_PERSONA_STORAGE_KEY);
-    if (demo) return demo;
+    const demo = getActiveDemoPersona();
+    if (demo) return `demo:${demo}`;
   }
   return accessToken;
 }
