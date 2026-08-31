@@ -34,6 +34,7 @@ import {
   requireDb,
   requireProjectRole,
   roleCan,
+  seedEnterpriseDataset,
   wouldCreateBlockCycle,
 } from "./db.js";
 import { invokeLLM, listLLMModels } from "./_core/llm.js";
@@ -1658,6 +1659,24 @@ export const appRouter = router({
   });
 });`,
         };
+      }),
+  }),
+
+  demo: router({
+    seedEnterprise: protectedProcedure
+      .input(
+        z.object({
+          projectId: z.number().int().positive(),
+          count: z.number().int().min(10).max(150).default(100),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        await access(ctx.user.id, input.projectId, "member");
+        return await seedEnterpriseDataset(
+          input.projectId,
+          ctx.user.id,
+          input.count
+        );
       }),
   }),
 });

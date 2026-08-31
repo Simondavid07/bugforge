@@ -30,10 +30,12 @@ import {
   ChevronDown,
   CircleDotDashed,
   Command,
+  Dices,
   LayoutDashboard,
   LogOut,
   Moon,
   Plus,
+  RotateCcw,
   Rows3,
   Sparkles,
   Sun,
@@ -41,6 +43,9 @@ import {
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { useActiveProject } from "@/hooks/useActiveProject";
+import { toast } from "sonner";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { PerformanceLab } from "./PerformanceLab";
 
@@ -144,6 +149,28 @@ function SignInGate() {
         </div>
 
         <div className="soft-card p-6 sm:p-7">
+          {/* Hero 100-Issue Sandbox Button */}
+          <div className="mb-5 rounded-2xl border-2 border-[#75937E]/40 bg-gradient-to-r from-[#F4FAF6] via-[#FFFDF5] to-[#F4FAF6] p-4 text-center sm:text-left sm:flex sm:items-center sm:justify-between sm:gap-4 shadow-sm">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 justify-center sm:justify-start">
+                <span className="flex h-2 w-2 rounded-full bg-[#2B5436]" />
+                <p className="font-bold text-sm text-[#18342C]">
+                  🚀 100-Issue Enterprise Sandbox
+                </p>
+              </div>
+              <p className="text-xs text-[#718079]">
+                Pre-populates a high-density synthetic dataset across all 5 workflow lanes with blocker DAGs and Monte Carlo curves.
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => void loginAsPersona("admin")}
+              className="mt-3 sm:mt-0 h-10 shrink-0 rounded-xl bg-[#18342C] px-4 font-bold text-xs text-white shadow-md hover:bg-[#264B40]"
+            >
+              Launch Live Sandbox ➔
+            </Button>
+          </div>
+
           <div className="flex items-center justify-between border-b border-[#E8EAE3] pb-4 mb-5">
             <div>
               <div className="flex items-center gap-2">
@@ -344,6 +371,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2.5">
+            <EnterpriseSeedButton />
             <PerformanceLab />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -477,5 +505,42 @@ function CustomCursor() {
       <div ref={dot} aria-hidden className="cursor-dot" />
       <div ref={ring} aria-hidden className="cursor-ring" />
     </>
+  );
+}
+
+function EnterpriseSeedButton() {
+  const { projectId } = useActiveProject();
+  const utils = trpc.useUtils();
+  const seedMutation = trpc.demo.seedEnterprise.useMutation({
+    onSuccess: data => {
+      toast.success(
+        `Enterprise Sandbox active: ${data.total} defects populated across all 5 lanes!`
+      );
+      void utils.issues.list.invalidate();
+      void utils.issues.board.invalidate();
+      void utils.issues.dependencyGraph.invalidate();
+      void utils.project.overview.invalidate();
+      void utils.project.monteCarloForecast.invalidate();
+    },
+    onError: err => toast.error(err.message),
+  });
+
+  if (!projectId) return null;
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => seedMutation.mutate({ projectId, count: 100 })}
+      disabled={seedMutation.isPending}
+      className="h-8 rounded-xl border-[#F0C068]/60 bg-[#FFFDF5] px-2.5 text-xs font-semibold text-[#8C6212] hover:bg-[#FFF8E7] shadow-sm"
+    >
+      {seedMutation.isPending ? (
+        <RotateCcw className="mr-1.5 h-3.5 w-3.5 animate-spin text-[#8C6212]" />
+      ) : (
+        <Dices className="mr-1.5 h-3.5 w-3.5 text-[#8C6212]" />
+      )}
+      {seedMutation.isPending ? "Seeding 100…" : "100-Issue Demo"}
+    </Button>
   );
 }

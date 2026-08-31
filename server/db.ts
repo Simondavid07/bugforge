@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, max, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, max, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import {
@@ -837,6 +837,191 @@ export async function ensureDemoPersonaUser(personaKey: string): Promise<typeof 
   }
 
   return user;
+}
+
+export async function seedEnterpriseDataset(
+  projectId: number,
+  userId: number,
+  targetCount = 100
+): Promise<{ seeded: number; total: number }> {
+  const db = await requireDb();
+
+  const existing = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(issues)
+    .where(eq(issues.projectId, projectId));
+  const currentCount = Number(existing[0]?.count ?? 0);
+  if (currentCount >= targetCount) return { seeded: 0, total: currentCount };
+
+  const startNumber = await getNextIssueNumber(projectId);
+  const toGenerate = Math.max(10, targetCount - currentCount);
+
+  const categories = [
+    {
+      prefix: "API / Core Backend",
+      titles: [
+        "PostgreSQL connection pool exhaustion under 10k concurrent RPS burst",
+        "JWT token expiry race condition during async mutation in SSR handler",
+        "Rate limiter token bucket leak on malformed X-Forwarded-For headers",
+        "tRPC batch query timeout when payload array exceeds 500 items",
+        "SSE real-time event stream silent disconnection on NAT gateway timeout",
+        "CORS preflight caching failure on custom X-Workspace-Context headers",
+        "Redis cluster failover causes transient cache stampede on overview pulse",
+        "GraphQL query complexity depth limit bypass via recursive fragments",
+        "Database deadlocks occurring during concurrent workspace cascade deletions",
+        "Unbounded memory growth in Express raw body parser stream buffer",
+      ],
+      severity: "critical" as const,
+      priority: "high" as const,
+    },
+    {
+      prefix: "Frontend & Studio UI",
+      titles: [
+        "Keyboard focus drops to document body after closing search modal",
+        "Theme hydration flash of unstyled content (FOUC) on cold start",
+        "Virtual list scroll jitter when rendering 10,000 rows with dynamic heights",
+        "Dropdown menu clipped inside overflow-hidden parent layout container",
+        "CSS variable project accent color flash during route transition",
+        "Toast notification stacking collision on rapid multi-action triggers",
+        "Mobile bottom sheet drag gesture conflicts with horizontal lane scroll",
+        "Command palette fuzzy search rank deprioritizes exact issue number prefix",
+        "SVG dependency DAG node layout overlaps when graph depth exceeds 8 levels",
+        "Color picker hex validator fails on uppercase 6-digit RGB strings",
+      ],
+      severity: "major" as const,
+      priority: "medium" as const,
+    },
+    {
+      prefix: "Security & Access Governance",
+      titles: [
+        "Private storage presigned URL TTL exceeds 15m compliance policy",
+        "Session cookie missing SameSite=Lax flag on WebKit Safari browsers",
+        "Cross-tenant project access barrier bypass via forged workspace ID",
+        "Avatar upload MIME sniffing bypass vulnerability with polyglot PNG",
+        "Audit ledger activity tampering risk due to missing immutable append trigger",
+        "API key rotation fails to immediately invalidate cached bearer tokens",
+        "Exported project CSV summary includes unredacted member email addresses",
+        "Passwordless magic link token reused after single-use validation",
+      ],
+      severity: "blocker" as const,
+      priority: "urgent" as const,
+    },
+    {
+      prefix: "SRE & Infrastructure",
+      titles: [
+        "Docker container OOM kill during asset bundle minification worker",
+        "Vercel serverless function cold start latency spikes above 1400ms",
+        "Database B-tree index scan degradation on issueLinks join predicates",
+        "Health check false negative during database connection pool warmup",
+        "Prometheus metric exporter memory leak on active websocket connections",
+        "Blob storage multipart upload part missing on network timeout retry",
+        "Log aggregation ingestion buffer drops structured JSON log payloads",
+      ],
+      severity: "critical" as const,
+      priority: "high" as const,
+    },
+    {
+      prefix: "SCM & Git Traceability",
+      titles: [
+        "GitHub webhook payload HMAC signature verification timing side-channel",
+        "Git commit SHA link parser fails on multiline commit descriptions",
+        "Merge conflict resolution silently drops downstream blocker link tags",
+        "Branch protection check fails to register automatic status promotion",
+        "Git diff parser fails on binary file patch chunks without error warning",
+      ],
+      severity: "major" as const,
+      priority: "medium" as const,
+    },
+    {
+      prefix: "Accessibility & Standards",
+      titles: [
+        "Screen reader ignores aria-expanded state on collapsing sidebar menus",
+        "Contrast ratio below WCAG AA 4.5:1 on muted metadata timestamp labels",
+        "Skip to content anchor links to nonexistent main region container ID",
+        "Dialog focus trap fails to loop focus back to initial modal element",
+        "High contrast mode disables visible outline on custom checkbox controls",
+      ],
+      severity: "minor" as const,
+      priority: "low" as const,
+    },
+  ];
+
+  const statuses: Array<(typeof issueEnums.status)[number]> = [
+    "intake",
+    "triage",
+    "in_progress",
+    "verify",
+    "done",
+  ];
+  const resolutions: Array<(typeof issueEnums.resolution)[number]> = [
+    "fixed",
+    "duplicate",
+    "wont_fix",
+    "works_as_intended",
+    "invalid",
+  ];
+
+  const insertedIds: number[] = [];
+
+  for (let i = 0; i < toGenerate; i++) {
+    const num = startNumber + i;
+    const cat = categories[i % categories.length]!;
+    const titleBase =
+      cat.titles[Math.floor(i / categories.length) % cat.titles.length]!;
+    const title = `${titleBase} (#${num})`;
+    const status = statuses[i % statuses.length]!;
+    const resolution =
+      status === "done" ? resolutions[i % resolutions.length] : null;
+    const isBlocker = cat.severity === "blocker" || i % 12 === 0;
+
+    const [created] = await db
+      .insert(issues)
+      .values({
+        projectId,
+        number: num,
+        title,
+        description: `Comprehensive diagnostic record for: ${titleBase}. Identified during continuous integration test suite run across distributed test runners.`,
+        expectedResult:
+          "Operation executes within strict SLA bounds with zero data loss and clean error boundaries.",
+        actualResult: `Observed regression in environment: ${cat.prefix}. Stack trace captured in telemetry logs.`,
+        reproducibleSteps: `1. Authenticate with project role.\n2. Trigger high-concurrency workload matching ${cat.prefix}.\n3. Observe telemetry anomaly under load test.`,
+        environment: `Production Cluster / Node.js 24 / PostgreSQL 16 (${cat.prefix})`,
+        severity: isBlocker ? "blocker" : cat.severity,
+        priority: cat.priority,
+        status,
+        resolution,
+        reporterId: userId,
+        assigneeId: userId,
+        isReleaseBlocker: isBlocker,
+        triagedAt:
+          status !== "intake"
+            ? new Date(Date.now() - i * 3600000)
+            : null,
+        resolvedAt:
+          status === "done" ? new Date(Date.now() - i * 1800000) : null,
+      })
+      .returning({ id: issues.id });
+
+    if (created) insertedIds.push(created.id);
+  }
+
+  // Create realistic DAG dependencies across generated issues
+  for (let i = 0; i < insertedIds.length - 2; i += 3) {
+    const sourceId = insertedIds[i]!;
+    const targetId = insertedIds[i + 1]!;
+    try {
+      await db.insert(issueLinks).values({
+        issueId: sourceId,
+        linkedIssueId: targetId,
+        type: "blocks",
+        createdById: userId,
+      });
+    } catch {
+      // Ignore link conflicts
+    }
+  }
+
+  return { seeded: insertedIds.length, total: currentCount + insertedIds.length };
 }
 
 export async function wouldCreateBlockCycle(
