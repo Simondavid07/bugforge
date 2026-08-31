@@ -121,7 +121,7 @@ flowchart LR
   F --> G[7. Check Monte Carlo Forecast]
 ```
 
-1. **1-Click Sign In**: Select **Eve Adams (Triage Lead)** on [`bugforge-lyart.vercel.app`](https://bugforge-lyart.vercel.app). You land on the **Overview** screen displaying the active project (`WEB`), current sprint readiness radar, severity pulse, and next moves queue.
+1. **1-Click Sign In**: Select **Elena Rostova (Triage Director)** on [`bugforge-lyart.vercel.app`](https://bugforge-lyart.vercel.app). You land on the **Overview** screen displaying the active project (`WEB`), current sprint readiness radar, severity pulse, and next moves queue.
 2. **Discover via Keyboard (`⌘K`)**: Press `Cmd/Ctrl + K` to trigger the **Spotlight Command Palette**. Type `WEB-101` or search `"focus"` to jump straight to issue `WEB-101` (*"Keyboard focus is lost after saving a saved search"*).
 3. **Inspect the Interactive Blocker Graph**: Click **View Dependency Graph** in the Issue Desk or open **Workboards** (`/boards`) to see the interactive SVG DAG with the pulsing red critical path.
 4. **Synthesize AI Code Patch**: In the Issue Desk, click **Synthesize Code Patch** in **Patch Studio**. The model generates a syntax-highlighted Unified Git Diff (`.patch`) with one-click **"Copy Diff"** and **"Download `.patch`"** buttons!
