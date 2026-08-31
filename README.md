@@ -130,15 +130,30 @@ flowchart LR
 
 BugForge features a warm **editorial correspondence aesthetic** — combining paper textures, deep ink typography, terracotta, rose, sage, and dusty-gold accents with strict accessibility, visible focus indicators, and reduced-motion safety.
 
+### 1. 🎲 Stochastic Intelligence — Monte Carlo Sprint Release Forecaster
+[![Monte Carlo Release Forecaster](docs/assets/product-tour/monte-carlo-simulation.png)](docs/assets/product-tour/monte-carlo-simulation.png)
+*Shows the **1,000-run Box-Muller stochastic simulation** in Insights (`/analytics`), calculating **P50 (27.9 days)**, **P80 (29.6 days)**, and **P95 (31.1 days)** with an interactive probability density histogram across 81 open defects and 21 release blockers.*
+
+---
+
+### 2. 🕸️ 100-Signal Workboard & Critical Path Dependency Graph
+[![Workboard with 100 Signals and Blocker DAG](docs/assets/product-tour/workboard-100-signals.png)](docs/assets/product-tour/workboard-100-signals.png)
+*Shows the high-density **100-signal enterprise workspace** in Workboard (`/boards`), featuring the **`100-Issue Demo`** trigger, **`Evidence Lab`** button, 1-Click Role Switcher, and the **Interactive SVG Dependency Graph with Kahn's 2-Node Critical Path highlight**.*
+
+---
+
+### 3. 🔍 Issue Desk — Structured Reproduction Dossier & AI Actions
+[![Issue Desk Enterprise Report](docs/assets/product-tour/issue-desk-enterprise.png)](docs/assets/product-tour/issue-desk-enterprise.png)
+*Shows the Issue Desk (`/issues/83`), highlighting real-world triage metadata (`Triage` / `Critical`), instant action buttons (**Watch issue**, **AI review draft**, **View Dependency Graph**), and the structured **Reproduction Kit** separating expected vs actual behavior before conversation.*
+
+---
+
+### 4. 🌗 Light & Dark Editorial Appearances
+
 | Overview — Dark Appearance | Overview — Light Appearance |
 | :---: | :---: |
 | [![BugForge Overview Dark](docs/assets/product-tour/overview-dark.png)](docs/assets/product-tour/overview-dark.png) | [![BugForge Overview Light](docs/assets/product-tour/overview-light.png)](docs/assets/product-tour/overview-light.png) |
 | *Deep ink surfaces, readable pastel status cards, Quick find, New issue modal, and project context.* | *High-contrast paper surfaces, semantic status chips, release readiness gauge, and next-action queue.* |
-
-| Workboard — Light Appearance | Insights — Dark Appearance |
-| :---: | :---: |
-| [![BugForge Workboard Light](docs/assets/product-tour/workboard-light.png)](docs/assets/product-tour/workboard-light.png) | [![BugForge Insights Dark](docs/assets/product-tour/insights-dark.png)](docs/assets/product-tour/insights-dark.png) |
-| *Five workflow lanes (**Intake**, **Triage**, **In progress**, **Verify**, **Done**) with role-aware moves.* | *Project health summary: open issues, throughput velocity, release blockers, severity mix, and aging.* |
 
 ---
 
