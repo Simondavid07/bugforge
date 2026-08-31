@@ -8,6 +8,36 @@ import {
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+const PERSONA_PROFILES: Record<
+  string,
+  { id: number; name: string; email: string; role: "admin" | "user" }
+> = {
+  admin: {
+    id: 1,
+    name: "Carol Danvers (Admin)",
+    email: "admin@bugforge.demo",
+    role: "admin",
+  },
+  triage: {
+    id: 2,
+    name: "Eve Adams (Triage)",
+    email: "triage@bugforge.demo",
+    role: "user",
+  },
+  developer: {
+    id: 3,
+    name: "Alice Smith (Dev)",
+    email: "dev@bugforge.demo",
+    role: "user",
+  },
+  viewer: {
+    id: 4,
+    name: "Bob Jones (Viewer)",
+    email: "viewer@bugforge.demo",
+    role: "user",
+  },
+};
+
 export function useAuth() {
   const utils = trpc.useUtils();
   const [demoPersona, setDemoPersona] = useState<string | null>(() =>
@@ -79,33 +109,41 @@ export function useAuth() {
       setDemoPersona(personaKey);
       setSignedIn(true);
       setSessionReady(true);
-      await utils.auth.me.invalidate();
-      await utils.workspace.mine.invalidate();
-      await utils.project.overview.invalidate();
+
+      const profile = PERSONA_PROFILES[personaKey] ?? PERSONA_PROFILES.admin;
+      utils.auth.me.setData(undefined, {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        role: profile.role,
+        avatarUrl: null,
+        loginMethod: "demo",
+        openId: `demo:${personaKey}`,
+        lastSignedIn: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as any);
+
+      void utils.auth.me.refetch();
+      void utils.workspace.mine.refetch();
+      void utils.project.overview.refetch();
     },
     [utils]
   );
 
   const logout = useCallback(async () => {
+    setDemoPersonaToken(null);
+    setDemoPersona(null);
+    setSignedIn(false);
+    utils.auth.me.setData(undefined, null);
     try {
       await logoutMutation.mutateAsync();
-    } catch (error: unknown) {
-      if (
-        error instanceof TRPCClientError &&
-        error.data?.code === "UNAUTHORIZED"
-      ) {
-        // The local Supabase session still needs to be cleared below.
-      } else {
-        throw error;
-      }
+    } catch {
+      // Ignore network errors on logout
     } finally {
-      setDemoPersonaToken(null);
-      setDemoPersona(null);
       await supabase.auth.signOut();
       setSupabaseAccessToken(null);
-      setSignedIn(false);
-      utils.auth.me.setData(undefined, null);
-      await utils.auth.me.invalidate();
+      void utils.auth.me.invalidate();
     }
   }, [logoutMutation, utils]);
 
