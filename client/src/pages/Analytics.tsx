@@ -2,8 +2,207 @@ import { useCorrespondenceSurface } from "@/hooks/useCorrespondenceSurface";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { severityMeta } from "@/lib/bugforge";
 import { trpc } from "@/lib/trpc";
-import { BarChart3, TrendingDown, TrendingUp } from "lucide-react";
+import { MonteCarloSimulation } from "@/components/MonteCarloSimulation";
+import { PerformanceLab } from "@/components/PerformanceLab";
+import { BarChart3, Sparkles, TrendingDown, TrendingUp, Zap } from "lucide-react";
 
-export default function Analytics() { useCorrespondenceSurface("insights"); const { projectId, activeProject } = useActiveProject(); const overview = trpc.project.overview.useQuery({ projectId: projectId ?? 0 }, { enabled: Boolean(projectId) }); if (!projectId || overview.isLoading || !overview.data) return <CleanAnalyticsEmpty />; const { stats } = overview.data; return <div className="mx-auto max-w-[1400px] space-y-5"><section className="soft-card p-7"><p className="eyebrow text-[#718079]">{activeProject?.key} · project health</p><div className="mt-3 flex flex-wrap items-end justify-between gap-3"><div><h1 className="display-heading text-4xl">Analytics with a pulse.</h1><p className="mt-2 text-sm text-[#718079]">Use patterns to guide a conversation, not replace one.</p></div><span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF0A8] text-[#19352D]"><BarChart3 className="h-5 w-5" /></span></div></section><section className="grid gap-4 lg:grid-cols-3"><Metric title="Open issues" value={stats.open} detail={`${stats.untriaged} still in intake`} tone="bg-[#FFF0A8]" icon={TrendingUp} /><Metric title="Resolved" value={stats.done} detail={`${stats.throughput} completed in 14 days`} tone="bg-[#A8E6CF]" icon={TrendingDown} /><Metric title="Release attention" value={stats.blockers + stats.overdue} detail={`${stats.blockers} blockers · ${stats.overdue} overdue`} tone="bg-[#FFD8D2]" icon={BarChart3} /></section><section className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]"><div className="soft-card p-7"><p className="eyebrow text-[#718079]">Severity mix</p><h2 className="display-heading mt-2 text-3xl">Where the impact sits</h2><div className="mt-7 space-y-5">{stats.bySeverity.map(item => <div key={item.name}><div className="mb-2 flex justify-between text-xs font-semibold text-[#617067]"><span>{item.name}</span><span>{item.value}</span></div><div className="h-2 overflow-hidden rounded-full bg-[#F1F2EA]"><div className={`h-full rounded-full ${severityMeta[item.name as keyof typeof severityMeta].className}`} style={{ width: `${Math.max(2, stats.total ? (item.value / stats.total) * 100 : 0)}%` }} /></div></div>)}</div></div><div className="rounded-[26px] bg-[#DCCEFF] p-7"><p className="eyebrow text-[#617067]">Aging lanes</p><h2 className="display-heading mt-2 text-3xl">Keep the work fresh.</h2><div className="mt-7 grid grid-cols-3 gap-3">{stats.aging.map(item => <div key={item.days} className="rounded-2xl bg-white/75 p-4 text-center"><p className="display-heading text-4xl">{item.value}</p><p className="mt-1 text-[10px] font-bold uppercase text-[#718079]">{item.days}+ days</p></div>)}</div><p className="mt-8 border-t border-[#19352D]/10 pt-4 text-xs leading-5 text-[#617067]">Treat issue age and throughput as gentle conversation starters.</p></div></section></div>; }
-function Metric({ title, value, detail, tone, icon: Icon }: { title: string; value: number; detail: string; tone: string; icon: typeof BarChart3 }) { return <div className={`play-card rounded-[24px] border border-[#E1E5DB] p-6 ${tone}`}><Icon className="h-5 w-5 text-[#19352D]" /><p className="eyebrow mt-6 text-[#617067]">{title}</p><p className="display-heading mt-2 text-5xl">{value}</p><p className="mt-4 text-xs font-medium text-[#617067]">{detail}</p></div>; }
-function CleanAnalyticsEmpty() { return <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1.1fr_.9fr]"><section className="rounded-[30px] bg-[#18342C] p-9 text-white md:p-10"><p className="eyebrow text-white/55">Insights engine</p><h1 className="display-heading mt-4 max-w-xl text-5xl leading-[.92]">Know what to fix before release day makes the call.</h1><p className="mt-5 max-w-lg text-sm leading-7 text-white/65">Your reporting, triage, and resolution patterns become a friendly release-readiness pulse here.</p><div className="mt-10 flex items-end gap-2">{[30, 48, 39, 72, 54, 88, 65, 94].map((height, index) => <div key={index} className="flex-1 rounded-t-xl bg-[#FF7164]" style={{ height: `${height}px`, opacity: .55 + index * .05 }} />)}</div></section><section className="soft-card p-7"><p className="eyebrow text-[#718079]">Metrics waiting</p><div className="mt-7 grid grid-cols-2 gap-3">{[["Issue health", "#A8E6CF"], ["Triage debt", "#FFF0A8"], ["Issue age", "#DCCEFF"], ["Release radar", "#FFD8D2"]].map(([label, color], index) => <div key={label} className="rounded-2xl p-4" style={{ backgroundColor: color }}><p className="font-mono text-[10px] text-[#718079]">0{index + 1}</p><p className="mt-7 text-sm font-semibold">{label}</p><div className="mt-3 h-1.5 rounded-full bg-white/70"><div className="h-full rounded-full bg-[#19352D]/35" style={{ width: `${32 + index * 13}%` }} /></div></div>)}</div></section></div>; }
+export default function Analytics() {
+  useCorrespondenceSurface("insights");
+  const { projectId, activeProject } = useActiveProject();
+  const overview = trpc.project.overview.useQuery(
+    { projectId: projectId ?? 0 },
+    { enabled: Boolean(projectId) }
+  );
+
+  if (!projectId || overview.isLoading || !overview.data)
+    return <CleanAnalyticsEmpty />;
+
+  const { stats } = overview.data;
+
+  return (
+    <div className="mx-auto max-w-[1400px] space-y-6">
+      {/* Header Banner */}
+      <section className="soft-card p-7">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="eyebrow text-[#718079]">
+              {activeProject?.key} · defect intelligence & release risk
+            </p>
+            <h1 className="display-heading mt-2 text-4xl">
+              Analytics with a pulse.
+            </h1>
+            <p className="mt-2 text-sm text-[#718079]">
+              Stochastic release forecasting, blocker aging, and live system performance benchmarks.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <PerformanceLab />
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF0A8] text-[#19352D]">
+              <BarChart3 className="h-5 w-5" />
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Top 3 Core Metrics */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        <Metric
+          title="Open issues"
+          value={stats.open}
+          detail={`${stats.untriaged} still in intake`}
+          tone="bg-[#FFF0A8]"
+          icon={TrendingUp}
+        />
+        <Metric
+          title="Resolved"
+          value={stats.done}
+          detail={`${stats.throughput} completed in 14 days`}
+          tone="bg-[#A8E6CF]"
+          icon={TrendingDown}
+        />
+        <Metric
+          title="Release attention"
+          value={stats.blockers + stats.overdue}
+          detail={`${stats.blockers} blockers · ${stats.overdue} overdue`}
+          tone="bg-[#FFD8D2]"
+          icon={BarChart3}
+        />
+      </section>
+
+      {/* 🎲 Probabilistic Monte Carlo Sprint Forecaster */}
+      <MonteCarloSimulation projectId={projectId} />
+
+      {/* Severity Mix & Aging Grid */}
+      <section className="grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
+        <div className="soft-card p-7">
+          <p className="eyebrow text-[#718079]">Severity mix</p>
+          <h2 className="display-heading mt-2 text-3xl">
+            Where the impact sits
+          </h2>
+          <div className="mt-7 space-y-5">
+            {stats.bySeverity.map(item => (
+              <div key={item.name}>
+                <div className="mb-2 flex justify-between text-xs font-semibold text-[#617067]">
+                  <span className="capitalize">{item.name}</span>
+                  <span className="font-mono">{item.value}</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-[#F1F2EA]">
+                  <div
+                    className={`h-full rounded-full ${
+                      severityMeta[item.name as keyof typeof severityMeta]
+                        ?.className ?? "bg-[#19352D]"
+                    }`}
+                    style={{
+                      width: `${Math.max(
+                        2,
+                        stats.total ? (item.value / stats.total) * 100 : 0
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[26px] bg-[#DCCEFF] p-7">
+          <p className="eyebrow text-[#617067]">Aging lanes</p>
+          <h2 className="display-heading mt-2 text-3xl">Keep the work fresh.</h2>
+          <div className="mt-7 grid grid-cols-3 gap-3">
+            {stats.aging.map(item => (
+              <div
+                key={item.days}
+                className="rounded-2xl bg-white/75 p-4 text-center"
+              >
+                <p className="display-heading text-4xl">{item.value}</p>
+                <p className="mt-1 text-[10px] font-bold uppercase text-[#718079]">
+                  {item.days}+ days
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 border-t border-[#19352D]/10 pt-4 text-xs leading-5 text-[#617067]">
+            Stale defects (over 14 days) introduce hidden release risk. Address triage bottlenecks early.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Metric({
+  title,
+  value,
+  detail,
+  tone,
+  icon: Icon,
+}: {
+  title: string;
+  value: number;
+  detail: string;
+  tone: string;
+  icon: typeof BarChart3;
+}) {
+  return (
+    <div
+      className={`play-card rounded-[24px] border border-[#E1E5DB] p-6 ${tone}`}
+    >
+      <Icon className="h-5 w-5 text-[#19352D]" />
+      <p className="eyebrow mt-6 text-[#617067]">{title}</p>
+      <p className="display-heading mt-2 text-5xl">{value}</p>
+      <p className="mt-4 text-xs font-medium text-[#617067]">{detail}</p>
+    </div>
+  );
+}
+
+function CleanAnalyticsEmpty() {
+  return (
+    <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[1.1fr_.9fr]">
+      <section className="rounded-[30px] bg-[#18342C] p-9 text-white md:p-10">
+        <p className="eyebrow text-white/55">Insights engine</p>
+        <h1 className="display-heading mt-4 max-w-xl text-5xl leading-[.92]">
+          Know what to fix before release day makes the call.
+        </h1>
+        <p className="mt-5 max-w-lg text-sm leading-7 text-white/65">
+          Your reporting, triage, Monte Carlo simulation, and resolution patterns become a friendly release-readiness pulse here.
+        </p>
+        <div className="mt-10 flex items-end gap-2">
+          {[30, 48, 39, 72, 54, 88, 65, 94].map((height, index) => (
+            <div
+              key={index}
+              className="flex-1 rounded-t-xl bg-[#FF7164]"
+              style={{ height: `${height}px`, opacity: 0.55 + index * 0.05 }}
+            />
+          ))}
+        </div>
+      </section>
+      <section className="soft-card p-7">
+        <p className="eyebrow text-[#718079]">Metrics waiting</p>
+        <div className="mt-7 grid grid-cols-2 gap-3">
+          {[
+            ["Issue health", "#A8E6CF"],
+            ["Triage debt", "#FFF0A8"],
+            ["Issue age", "#DCCEFF"],
+            ["Release radar", "#FFD8D2"],
+          ].map(([label, color], index) => (
+            <div
+              key={label}
+              className="rounded-2xl p-4"
+              style={{ backgroundColor: color }}
+            >
+              <p className="font-mono text-[10px] text-[#718079]">0{index + 1}</p>
+              <p className="mt-7 text-sm font-semibold">{label}</p>
+              <div className="mt-3 h-1.5 rounded-full bg-white/70">
+                <div
+                  className="h-full rounded-full bg-[#19352D]/35"
+                  style={{ width: `${32 + index * 13}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}

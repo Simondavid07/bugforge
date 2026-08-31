@@ -42,6 +42,7 @@ import {
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
+import { PerformanceLab } from "./PerformanceLab";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", path: "/" },
@@ -343,6 +344,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2.5">
+            <PerformanceLab />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button

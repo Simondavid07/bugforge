@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BlockerGraph } from "@/components/BlockerGraph";
+import { PatchStudio } from "@/components/PatchStudio";
 import {
   initials,
   relativeTime,
@@ -370,6 +371,9 @@ export default function IssueDetail() {
               </div>
             </article>
           )}
+
+          {/* Automated AI Patch Synthesizer & Code Remediation Studio */}
+          <PatchStudio issueId={issue.id} issueNumber={issue.number} />
 
           {/* Comments & Discussion */}
           <CommentThread
