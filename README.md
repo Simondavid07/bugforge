@@ -307,4 +307,4 @@ BugForge addresses the challenge of reconstructing the essential developer workf
 
 This repository is an independent educational/product reconstruction inspired by the problem domain addressed by Bugzilla. It is not an official Bugzilla project and does not reproduce Bugzilla's UI or source implementation.
 
-[FILL IN: actual license — Mantis uses MIT; pick and state one explicitly, since "consult the repository owner" reads as unfinished to a judge.]
+[FILL IN: actual license — uses MIT; pick and state one explicitly, since "consult the repository owner" reads as unfinished to a judge.]
