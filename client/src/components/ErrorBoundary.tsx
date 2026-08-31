@@ -21,6 +21,18 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error) {
+    const isChunkError =
+      error?.message?.includes("dynamically imported module") ||
+      error?.message?.includes("Loading chunk") ||
+      error?.name === "ChunkLoadError";
+
+    if (isChunkError && !sessionStorage.getItem("bugforge_chunk_reloaded")) {
+      sessionStorage.setItem("bugforge_chunk_reloaded", "true");
+      window.location.reload();
+    }
+  }
+
   render() {
     if (this.state.hasError) {
       return (

@@ -5,17 +5,42 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import NotFound from "@/pages/NotFound";
 import AuthCallback from "@/pages/AuthCallback";
-import { lazy, Suspense, type ElementType } from "react";
+import { lazy, Suspense, type ComponentType, type ElementType } from "react";
 import { Route, Switch } from "wouter";
 
-const Home = lazy(() => import("@/pages/Home"));
-const IssueExplorer = lazy(() => import("@/pages/IssueExplorer"));
-const IssueDetail = lazy(() => import("@/pages/IssueDetail"));
-const Boards = lazy(() => import("@/pages/Boards"));
-const Analytics = lazy(() => import("@/pages/Analytics"));
-const Notifications = lazy(() => import("@/pages/Notifications"));
-const CommandPalette = lazy(() => import("@/components/CommandPalette"));
-const ProjectPersonalization = lazy(
+function lazyWithRetry<T extends ComponentType<any>>(
+  factory: () => Promise<{ default: T }>
+) {
+  return lazy(async () => {
+    try {
+      const component = await factory();
+      sessionStorage.removeItem("bugforge_chunk_retry");
+      return component;
+    } catch (error: any) {
+      const isChunkError =
+        error?.message?.includes("dynamically imported module") ||
+        error?.message?.includes("Loading chunk") ||
+        error?.name === "ChunkLoadError";
+
+      if (isChunkError && !sessionStorage.getItem("bugforge_chunk_retry")) {
+        sessionStorage.setItem("bugforge_chunk_retry", "true");
+        window.location.reload();
+        return new Promise(() => {});
+      }
+      sessionStorage.removeItem("bugforge_chunk_retry");
+      throw error;
+    }
+  });
+}
+
+const Home = lazyWithRetry(() => import("@/pages/Home"));
+const IssueExplorer = lazyWithRetry(() => import("@/pages/IssueExplorer"));
+const IssueDetail = lazyWithRetry(() => import("@/pages/IssueDetail"));
+const Boards = lazyWithRetry(() => import("@/pages/Boards"));
+const Analytics = lazyWithRetry(() => import("@/pages/Analytics"));
+const Notifications = lazyWithRetry(() => import("@/pages/Notifications"));
+const CommandPalette = lazyWithRetry(() => import("@/components/CommandPalette"));
+const ProjectPersonalization = lazyWithRetry(
   () => import("@/components/ProjectPersonalization")
 );
 
