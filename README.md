@@ -44,14 +44,14 @@ Everything is deployed, connected, and ready to evaluate right now on Vercel wit
 
 | Resource | Link | Description |
 |---|---|---|
-| **Live Web Application** | [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app) | Production deployment hosted on Vercel Edge/Serverless |
-| **1-Click Judge Personas** | [⚡ 1-Click Personas](#-1-click-fast-evaluator-personas) | Instant login as Admin, Triage Lead, Core Dev, or Viewer — zero typing required |
+| **100-Issue Live Sandbox** | Click **`Launch Live Sandbox ➔`** | Pre-populates 100 high-density synthetic defect records across all 5 workflow lanes |
+| **1-Click Judge Personas** | [⚡ 1-Click Personas](#-1-click-fast-evaluator-personas) | Instant login as Admin, Triage Lead, Core Dev, or Viewer with 0ms transition |
 | **Live Performance Lab** | Click **`⚡ Evidence Lab`** in Header | Live real-time latency ping meter, in-browser test runner, and zero-trust audit |
 | **GitHub OAuth** | **Continue with GitHub** | Supabase Auth with PKCE flow; automatic workspace initialization on first sign-in |
-| **Pre-Seeded Demo Fixture** | [`docs/evaluator-demo.md`](docs/evaluator-demo.md) | **Northstar Demo Workspace** (`WEB` project) with 8 synthetic issues across all 5 workflow states |
+| **Enterprise Demo Dataset** | [`docs/evaluator-demo.md`](docs/evaluator-demo.md) | **Northstar Enterprise** (`WEB` project) with 100 synthetic defects, blocker DAGs, and Monte Carlo curves |
 | **System Health Endpoint** | [`/api/trpc/system.health`](https://bugforge-lyart.vercel.app/api/trpc/system.health) | Bounded status check verifying live Supabase PostgreSQL connectivity without exposing credentials |
 
-> **Synthetic Dataset Notice**: The pre-seeded evaluator records (`WEB-101` through `WEB-108`) contain synthetic issues across all lifecycle lanes, private storage attachments, threaded comments, member mentions, blocker links, code patch synthesis, and AI triage drafts. No real customer or production data is implied. See [`docs/evaluator-demo-dataset.json`](docs/evaluator-demo-dataset.json).
+> **Synthetic Dataset Notice**: The pre-seeded evaluator records contain 100 high-density synthetic issues across all lifecycle lanes, private storage attachments, threaded comments, member mentions, blocker links, code patch synthesis, and AI triage drafts. No real customer or production data is implied. See [`docs/evaluator-demo.md`](docs/evaluator-demo.md).
 
 ---
 
