@@ -3,28 +3,128 @@ import { useCorrespondenceSurface } from "@/hooks/useCorrespondenceSurface";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { statusMeta } from "@/lib/bugforge";
 import { trpc } from "@/lib/trpc";
+import { BlockerGraph } from "@/components/BlockerGraph";
 import { AlertTriangle, CircleDotDashed, Clock3, UserRound } from "lucide-react";
 import { useLocation } from "wouter";
 
 const lanes = ["intake", "triage", "in_progress", "verify", "done"] as const;
 
-export default function Boards() { useCorrespondenceSurface("workboard");
-  const { user } = useAuth();
-  const { projectId, activeProject } = useActiveProject();
-  const issuesQuery = trpc.issues.board.useQuery({ projectId: projectId ?? 0 }, { enabled: Boolean(projectId) });
-  const [, setLocation] = useLocation();
+export default function Boards() {
+  useCorrespondenceSurface("workboard");
+  const { projectId } = useActiveProject();
   if (!projectId) return <CleanBoardEmpty />;
   return <CleanWorkboard />;
-  const items = issuesQuery.data ?? [];
-  const now = Date.now();
-  const personal = items.filter(issue => issue.assigneeId === user?.id && issue.status !== "done");
-  const untriaged = items.filter(issue => issue.status === "intake");
-  const overdue = items.filter(issue => issue.status !== "done" && issue.dueAt && new Date(issue.dueAt).getTime() < now);
-  const blockers = items.filter(issue => issue.status !== "done" && (issue.isReleaseBlocker || issue.severity === "blocker"));
-  return <div className="mx-auto max-w-[1600px] space-y-5"><section className="flex flex-col justify-between gap-4 border-[3px] border-black bg-white p-5 shadow-[6px_6px_0_#000] md:flex-row md:items-center"><div><p className="eyebrow">{activeProject?.key} · team flow</p><h1 className="display-heading mt-1 text-3xl">Workboards</h1><p className="mt-1 text-sm text-black/60">Personal focus and team risk stay visible next to the workflow lanes.</p></div><CircleDotDashed className="h-9 w-9" /></section><section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"><SignalCard icon={UserRound} title="My assigned work" value={personal.length} items={personal.slice(0, 3)} onOpen={setLocation} tone="bg-[#d9c8ff]" /><SignalCard icon={CircleDotDashed} title="Untriaged reports" value={untriaged.length} items={untriaged.slice(0, 3)} onOpen={setLocation} tone="bg-[#ffe66d]" /><SignalCard icon={Clock3} title="Overdue issues" value={overdue.length} items={overdue.slice(0, 3)} onOpen={setLocation} tone="bg-[#ffcfbb]" /><SignalCard icon={AlertTriangle} title="Release blockers" value={blockers.length} items={blockers.slice(0, 3)} onOpen={setLocation} tone="bg-[#9de7d3]" /></section><section><div className="mb-3 flex items-center justify-between"><div><p className="eyebrow">Team flow</p><h2 className="display-heading text-2xl">Workflow lanes</h2></div><span className="font-mono text-xs font-bold">{items.length} total</span></div><div className="grid gap-4 xl:grid-cols-5">{lanes.map(lane => { const laneItems = items.filter(issue => issue.status === lane); return <div key={lane} className="min-h-[420px] border-[3px] border-black bg-white shadow-[4px_4px_0_#000]"><div className={`border-b-[3px] border-black p-3 ${statusMeta[lane].className}`}><div className="flex items-center justify-between"><p className="display-heading text-lg">{statusMeta[lane].label}</p><span className="flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-black bg-white text-[10px] font-black">{laneItems.length}</span></div></div><div className="space-y-2 p-2">{laneItems.map(issue => <button key={issue.id} onClick={() => setLocation(`/issues/${issue.id}`)} className="w-full border-2 border-black bg-[#fffdf8] p-3 text-left transition-transform hover:-translate-y-0.5"><p className="font-mono text-[10px] font-bold">#{issue.number}</p><p className="mt-1 text-sm font-bold leading-5">{issue.title}</p><div className="mt-3 flex items-center justify-between text-[10px] font-bold"><span>{issue.severity}</span>{issue.isReleaseBlocker && <span className="bg-[#ef563e] px-1">BLOCKER</span>}</div></button>)}{!laneItems.length && <div className="border-2 border-dashed border-black/25 p-4 text-center text-xs font-medium text-black/45">No signal here.</div>}</div></div>; })}</div></section></div>;
 }
 
-function CleanWorkboard() { const { projectId, activeProject } = useActiveProject(); const issues = trpc.issues.board.useQuery({ projectId: projectId ?? 0 }, { enabled: Boolean(projectId) }); const [, setLocation] = useLocation(); if (!projectId) return <CleanBoardEmpty />; const items = issues.data ?? []; return <div className="mx-auto max-w-[1600px] space-y-5"><section className="rounded-[28px] border border-[#E1E5DB] bg-white p-7 shadow-[0_16px_42px_rgba(27,60,45,.07)]" style={{ borderTopColor: "var(--project-accent, #A55343)", borderTopWidth: 4 }}><p className="eyebrow text-[#718079]">{activeProject?.key ?? "Project"} · team flow</p><div className="mt-3 flex flex-wrap items-end justify-between gap-4"><div><h1 className="display-heading text-4xl">Work that feels in motion.</h1><p className="mt-2 text-sm text-[#718079]">A friendly view of each stage, with just enough detail to decide what happens next.</p></div><span className="rounded-full bg-[#A8E6CF] px-3 py-1.5 font-mono text-xs text-[#19352D]">{items.length} signals</span></div></section><section className="grid gap-4 xl:grid-cols-5">{lanes.map((lane, index) => { const laneItems = items.filter(issue => issue.status === lane); const tones = ["#FFF0A8", "#DCCEFF", "#FFD8D2", "#A8E6CF", "#F1F2EA"]; return <div key={lane} className="workflow-lane min-h-[380px] rounded-[22px] border border-[#E1E5DB] bg-white p-3 shadow-[0_12px_28px_rgba(27,60,45,.05)]"><div className="workflow-lane-heading rounded-2xl border-l-4 p-3" style={{ backgroundColor: tones[index], borderLeftColor: "var(--project-accent, #A55343)" }}><div className="flex items-center justify-between"><p className="workflow-lane-title display-heading text-xl">{statusMeta[lane].label}</p><span className="workflow-lane-count flex h-7 min-w-7 items-center justify-center rounded-full text-[10px] font-bold">{laneItems.length}</span></div></div><div className="mt-3 space-y-2">{laneItems.map(issue => <button key={issue.id} onClick={() => setLocation(`/issues/${issue.id}`)} className="play-card w-full rounded-xl border border-[#E1E5DB] bg-[#FFFEFA] p-3 text-left hover:bg-white"><p className="font-mono text-[10px] text-[#718079]">#{issue.number}</p><p className="mt-1 text-sm font-semibold leading-5">{issue.title}</p><div className="mt-3 flex items-center justify-between text-[10px] font-medium text-[#718079]"><span>{issue.severity}</span>{issue.isReleaseBlocker && <span className="rounded-full bg-[#FF7164] px-1.5 py-0.5 text-[#19352D]">BLOCKER</span>}</div></button>)}{!laneItems.length && <div className="rounded-xl border border-dashed border-[#D6DDD4] p-4 text-center text-xs text-[#8A978F]">A pleasantly quiet lane.</div>}</div></div>; })}</section></div>; }
+function CleanWorkboard() {
+  const { projectId, activeProject } = useActiveProject();
+  const issues = trpc.issues.board.useQuery(
+    { projectId: projectId ?? 0 },
+    { enabled: Boolean(projectId) }
+  );
+  const [, setLocation] = useLocation();
+  if (!projectId) return <CleanBoardEmpty />;
+  const items = issues.data ?? [];
+
+  return (
+    <div className="mx-auto max-w-[1600px] space-y-5">
+      <section
+        className="rounded-[28px] border border-[#E1E5DB] bg-white p-7 shadow-[0_16px_42px_rgba(27,60,45,.07)]"
+        style={{
+          borderTopColor: "var(--project-accent, #A55343)",
+          borderTopWidth: 4,
+        }}
+      >
+        <p className="eyebrow text-[#718079]">
+          {activeProject?.key ?? "Project"} · team flow
+        </p>
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="display-heading text-4xl">
+              Work that feels in motion.
+            </h1>
+            <p className="mt-2 text-sm text-[#718079]">
+              A friendly view of each stage, with just enough detail to decide
+              what happens next.
+            </p>
+          </div>
+          <span className="rounded-full bg-[#A8E6CF] px-3 py-1.5 font-mono text-xs text-[#19352D]">
+            {items.length} signals
+          </span>
+        </div>
+      </section>
+
+      {/* Interactive Dependency & Critical Path Graph Cockpit */}
+      <BlockerGraph projectId={projectId} />
+
+      {/* 5-Lane Workflow Board */}
+      <section className="grid gap-4 xl:grid-cols-5">
+        {lanes.map((lane, index) => {
+          const laneItems = items.filter(issue => issue.status === lane);
+          const tones = [
+            "#FFF0A8",
+            "#DCCEFF",
+            "#FFD8D2",
+            "#A8E6CF",
+            "#F1F2EA",
+          ];
+          return (
+            <div
+              key={lane}
+              className="workflow-lane min-h-[380px] rounded-[22px] border border-[#E1E5DB] bg-white p-3 shadow-[0_12px_28px_rgba(27,60,45,.05)]"
+            >
+              <div
+                className="workflow-lane-heading rounded-2xl border-l-4 p-3"
+                style={{
+                  backgroundColor: tones[index],
+                  borderLeftColor: "var(--project-accent, #A55343)",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <p className="workflow-lane-title display-heading text-xl">
+                    {statusMeta[lane].label}
+                  </p>
+                  <span className="workflow-lane-count flex h-7 min-w-7 items-center justify-center rounded-full text-[10px] font-bold">
+                    {laneItems.length}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-3 space-y-2">
+                {laneItems.map(issue => (
+                  <button
+                    key={issue.id}
+                    onClick={() => setLocation(`/issues/${issue.id}`)}
+                    className="play-card w-full rounded-xl border border-[#E1E5DB] bg-[#FFFEFA] p-3 text-left hover:bg-white transition-transform hover:-translate-y-0.5"
+                  >
+                    <p className="font-mono text-[10px] text-[#718079]">
+                      #{issue.number}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold leading-5">
+                      {issue.title}
+                    </p>
+                    <div className="mt-3 flex items-center justify-between text-[10px] font-medium text-[#718079]">
+                      <span>{issue.severity}</span>
+                      {issue.isReleaseBlocker && (
+                        <span className="rounded-full bg-[#FF7164] px-1.5 py-0.5 text-[#19352D] font-bold">
+                          BLOCKER
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+                {!laneItems.length && (
+                  <div className="rounded-xl border border-dashed border-[#D6DDD4] p-4 text-center text-xs text-[#8A978F]">
+                    A pleasantly quiet lane.
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </section>
+    </div>
+  );
+}
 
 function SignalCard({ icon: Icon, title, value, items, onOpen, tone }: { icon: typeof UserRound; title: string; value: number; items: Array<{ id: number; number: number; title: string }>; onOpen: (path: string) => void; tone: string }) { return <article className={`border-[3px] border-black p-4 shadow-[4px_4px_0_#000] ${tone}`}><div className="flex items-start justify-between"><div><p className="eyebrow">Focus board</p><h2 className="display-heading mt-1 text-xl">{title}</h2></div><Icon className="h-5 w-5" /></div><p className="display-heading mt-5 text-4xl">{value}</p><div className="mt-4 space-y-1">{items.length ? items.map(issue => <button key={issue.id} onClick={() => onOpen(`/issues/${issue.id}`)} className="block w-full truncate border-t-2 border-black/25 pt-1 text-left text-xs font-bold hover:underline">#{issue.number} {issue.title}</button>) : <p className="border-t-2 border-black/25 pt-2 text-xs font-medium">Nothing demanding attention.</p>}</div></article>; }
 function PremiumBoardEmpty() { const lanes = ["Intake", "Triage", "Build", "Verify", "Ship"]; return <div className="mx-auto max-w-6xl"><section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-[#56e6be]/18 via-[#1b2038] to-[#1b2038] p-8 shadow-[0_24px_70px_rgba(0,0,0,.25)] md:p-10"><p className="eyebrow text-emerald-200/70">Team flow</p><h1 className="display-heading mt-4 max-w-2xl text-4xl leading-[.94] text-white md:text-5xl">Make progress feel visible, not buried.</h1><p className="mt-5 max-w-xl text-sm leading-7 text-white/60">Your board will organize ownership, triage debt, verification, and release risk in one focused flow.</p><div className="mt-10 grid gap-3 md:grid-cols-5">{lanes.map((lane, index) => <div key={lane} className="rounded-2xl border border-white/10 bg-black/15 p-4"><div className="flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${index === 0 ? "bg-[#ffbc4f]" : index === 1 ? "bg-[#a680ff]" : index === 2 ? "bg-[#ff7668]" : index === 3 ? "bg-[#56e6be]" : "bg-white/50"}`} /><p className="text-sm font-semibold text-white">{lane}</p></div><div className="mt-7 h-1 rounded-full bg-white/10"><div className="h-full rounded-full bg-white/25" style={{ width: `${18 + index * 14}%` }} /></div></div>)}</div></section></div>; }

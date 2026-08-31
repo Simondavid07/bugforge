@@ -12,29 +12,30 @@
 
 > **Modern issue intelligence for teams that need clarity, not ceremony.**
 >
-> **BugForge** is a ground-up reconstruction of the foundational defect-tracking workflow established by Bugzilla — capturing, classifying, assigning, discussing, verifying, resolving, and learning from issues — rebuilt from scratch with a calm, high-craft editorial design system, keyboard-first command ergonomics, deterministic release governance math, zero-leakage private storage, and human-reviewed AI triage assistance.
+> **BugForge** is a ground-up reconstruction of the foundational defect-tracking workflow established by Bugzilla — capturing, classifying, assigning, discussing, verifying, resolving, and learning from issues — rebuilt from scratch with a calm, high-craft editorial design system, 1-Click Fast Judge Personas, interactive blocker DAGs with cycle detection, real-time duplicate prevention, live GitHub SCM commit webhooks, a terminal CLI (`bugforge`), deterministic release governance math, zero-leakage private storage, and human-reviewed AI triage assistance.
 
 ---
 
 ## 📑 Table of Contents
 
-1. [⚡ Quick Start for Judges](#-quick-start-for-judges)
-2. [🧭 Worked Example — One Issue, Start to Finish](#-worked-example--one-issue-start-to-finish)
-3. [🖼️ Visual Tour & Interface Evidence](#️-visual-tour--interface-evidence)
-4. [🏆 The 5 Core Algorithmic & Security Moats](#-the-5-core-algorithmic--security-moats)
-5. [💻 Modern Developer Ergonomics](#-modern-developer-ergonomics)
-6. [🔄 Issue Lifecycle & State Machine](#-issue-lifecycle--state-machine)
-7. [🏗️ Architecture & Request Topology](#️-architecture--request-topology)
-8. [🔐 Authentication & Security Model](#-authentication--security-model)
-9. [🧪 Automated Test Suite](#-automated-test-suite)
-10. [💻 Local Development & Commands](#-local-development--commands)
-11. [⚙️ Environment Configuration](#️-environment-configuration)
-12. [📚 Documentation Index](#-documentation-index)
-13. [📄 License and Attribution](#-license-and-attribution)
+1. [⚡ Quick Start for Judges & Evaluators](#-quick-start-for-judges--evaluators)
+2. [👥 1-Click Fast Evaluator Personas](#-1-click-fast-evaluator-personas)
+3. [🧭 Worked Example — One Issue, Start to Finish](#-worked-example--one-issue-start-to-finish)
+4. [🖼️ Visual Tour & Interface Evidence](#️-visual-tour--interface-evidence)
+5. [🏆 The 6 Core Algorithmic & Security Moats](#-the-6-core-algorithmic--security-moats)
+6. [💻 Modern Developer Ergonomics & Terminal CLI](#-modern-developer-ergonomics--terminal-cli)
+7. [🔄 Issue Lifecycle & State Machine](#-issue-lifecycle--state-machine)
+8. [🏗️ Architecture & Request Topology](#️-architecture--request-topology)
+9. [🔐 Authentication & Security Model](#-authentication--security-model)
+10. [🧪 Automated Test Suite](#-automated-test-suite)
+11. [💻 Local Development & Commands](#-local-development--commands)
+12. [⚙️ Environment Configuration](#️-environment-configuration)
+13. [📚 Documentation Index](#-documentation-index)
+14. [📄 License and Attribution](#-license-and-attribution)
 
 ---
 
-## ⚡ Quick Start for Judges
+## ⚡ Quick Start for Judges & Evaluators
 
 ### 🌐 Option 1 — Live Hosted Sandbox (Zero Setup, Instant)
 
@@ -43,39 +44,59 @@ Everything is deployed, connected, and ready to evaluate right now on Vercel wit
 | Resource | Link | Description |
 |---|---|---|
 | **Live Web Application** | [https://bugforge-lyart.vercel.app](https://bugforge-lyart.vercel.app) | Production deployment hosted on Vercel Edge/Serverless |
-| **Authentication** | **1-Click Continue with GitHub** | Supabase Auth with PKCE flow; automatic personal workspace initialization on first sign-in |
+| **1-Click Judge Personas** | [⚡ 1-Click Personas](#-1-click-fast-evaluator-personas) | Instant login as Admin, Triage Lead, Core Dev, or Viewer — zero typing required |
+| **GitHub OAuth** | **Continue with GitHub** | Supabase Auth with PKCE flow; automatic workspace initialization on first sign-in |
 | **Pre-Seeded Demo Fixture** | [`docs/evaluator-demo.md`](docs/evaluator-demo.md) | **Northstar Demo Workspace** (`WEB` project) with 8 synthetic issues across all 5 workflow states |
 | **System Health Endpoint** | [`/api/trpc/system.health`](https://bugforge-lyart.vercel.app/api/trpc/system.health) | Bounded status check verifying live Supabase PostgreSQL connectivity without exposing credentials |
 
-> **Synthetic Dataset Notice**: The pre-seeded evaluator records (`WEB-101` through `WEB-108`) contain synthetic issues across all lifecycle lanes, private storage attachments, threaded comments, member mentions, and an AI triage draft. No real customer or production data is implied. See [`docs/evaluator-demo-dataset.json`](docs/evaluator-demo-dataset.json).
+> **Synthetic Dataset Notice**: The pre-seeded evaluator records (`WEB-101` through `WEB-108`) contain synthetic issues across all lifecycle lanes, private storage attachments, threaded comments, member mentions, blocker links, and an AI triage draft. No real customer or production data is implied. See [`docs/evaluator-demo-dataset.json`](docs/evaluator-demo-dataset.json).
 
 ---
 
-### 🧪 Option 2 — Run All 34 Automated Tests (< 3 Seconds)
+### 🧪 Option 2 — Run All Automated Tests (< 3 Seconds)
 
-Verify every authorization gate, workspace cascade safeguard, avatar signed-URL hydration, and personalization persistence rule locally:
+Verify every authorization gate, workspace cascade safeguard, avatar signed-URL hydration, cycle detection, and personalization persistence rule locally:
 
 ```bash
 git clone https://github.com/Simondavid07/bugforge.git
 cd bugforge
-pnpm install
-pnpm test
+npm test
 ```
 
 > **Result**: 34 unit and integration tests across 15 test files pass in ~2.8s with zero flaky mocks. See [Automated Test Suite](#-automated-test-suite) for the complete breakdown.
 
 ---
 
-### 🖥️ Option 3 — Run Locally
+### 🖥️ Option 3 — Run Locally & Terminal CLI
 
 ```bash
 git clone https://github.com/Simondavid07/bugforge.git
 cd bugforge
-pnpm install
-pnpm dev
+npm run dev
 ```
 
-Open the printed local URL (e.g. `http://localhost:3000`). Development runs Vite HMR paired with the local Express server; production compiles into static assets and serverless handler modules.
+Open [http://localhost:3000](http://localhost:3000). You can also run the terminal client:
+
+```bash
+npx bugforge list
+npx bugforge stats
+npx bugforge get 101
+```
+
+---
+
+## 👥 1-Click Fast Evaluator Personas
+
+The login screen and in-app header bar feature **1-Click Fast Persona Switching** — tap any persona to instantly test RBAC permissions without typing credentials:
+
+| Persona | Role | Key Capabilities & Permission Boundary |
+|---|---|---|
+| 👑 **Carol Danvers** *(Admin Lead)* | `admin` | **Full Platform Governance**: Workspace deletion, project accent customization, member role assignments |
+| 🎯 **Eve Adams** *(Triage Lead)* | `triage` | **Workflow & AI Lead**: Move issues between all 5 states, assign developers, review & apply AI drafts, toggle release blockers |
+| 💻 **Alice Smith** *(Core Dev)* | `member` | **Platform Engineer**: Edit issue reproduction kits, post threaded comments, attach private file evidence, link dependencies |
+| 👁️ **Bob Jones** *(Reporter / QA)* | `viewer` | **External Reporter / QA**: Create new issues, read project state; **demonstrates server-side HTTP 403 rejection** when attempting restricted mutations |
+
+> **Live RBAC Testing**: While logged in, click the **`Role: [Carol (Admin) ▼]`** dropdown in the header to switch between roles on the fly and see UI permissions and server validation update in real time!
 
 ---
 
@@ -85,23 +106,24 @@ Follow this 2-minute walkthrough on the live demo to experience BugForge's full 
 
 ```mermaid
 flowchart LR
-  A[1. Sign in via GitHub] --> B[2. Open Overview Pulse]
+  A[1. 1-Click Login as Eve] --> B[2. Open Overview Pulse]
   B --> C[3. Triage Issue WEB-101]
-  C --> D[4. Request AI Review Draft]
-  D --> E[5. Human Review & Apply]
-  E --> F[6. Move to Verify / Done]
-  F --> G[7. Check Insights Health Radar]
+  C --> D[4. View Blocker DAG]
+  D --> E[5. Request AI Review Draft]
+  E --> F[6. Human Review & Apply]
+  F --> G[7. Move to Verify / Done]
+  G --> H[8. Check Insights Health Radar]
 ```
 
-1. **Sign In & Orientation**: Click **Continue with GitHub** at [`bugforge-lyart.vercel.app`](https://bugforge-lyart.vercel.app). You land on the **Overview** screen displaying the active project (`WEB`), current sprint readiness radar, severity pulse, and next moves queue.
+1. **1-Click Sign In**: Select **Eve Adams (Triage Lead)** on [`bugforge-lyart.vercel.app`](https://bugforge-lyart.vercel.app). You land on the **Overview** screen displaying the active project (`WEB`), current sprint readiness radar, severity pulse, and next moves queue.
 2. **Discover via Keyboard (`⌘K`)**: Press `Cmd/Ctrl + K` to trigger the **Spotlight Command Palette**. Type `WEB-101` or search `"focus"` to jump straight to issue `WEB-101` (*"Keyboard focus is lost after saving a saved search"*).
-3. **Inspect the Structured Reproduction Kit**: Notice the clear separation of *Expected Result*, *Actual Result*, *Environment*, and *Reproducible Steps*.
+3. **Inspect the Interactive Blocker Graph**: Click **View Dependency Graph** in the Issue Desk or open **Workboards** (`/boards`) to see the interactive SVG DAG with the pulsing red critical path.
 4. **Trigger Human-in-the-Loop AI Triage**: Click **AI review draft**. The model analyzes the issue context against 25 prior project issues and generates a draft: concise summary, suggested severity (`major`), relevant labels (`accessibility`, `navigation`), duplicate candidate check, and cleaned reproduction steps.
 5. **Human Decision Gate**: Notice that **nothing is auto-applied**. Toggle which fields you approve and click **Apply selected**. The immutable audit ledger records `ai.recommendation_applied`.
 6. **Workflow State Transition**: Move the issue from **Intake** ➔ **Triage** ➔ **In Progress** ➔ **Verify** ➔ **Done**. When selecting **Done**, notice that the system strictly requires a resolution code (`Fixed`, `Duplicate`, `Won't fix`, `Works as intended`, or `Invalid`).
-7. **Collaboration & Mention**: Add a comment typing `@member-1`. The member receives an instant in-app notification in **Inbox**.
+7. **Proactive Duplicate Prevention**: Click **New issue** and type `"focus lost on search"`. Notice the real-time duplicate advisory box warning you of `#101` before you submit!
 8. **Private Evidence Attachment**: Upload a test screenshot or log file in the Evidence panel. BugForge streams it to private Supabase Storage and resolves it to a short-lived signed URL (15m TTL).
-9. **Inspect Project Health**: Navigate to **Workboard** (`/boards`) to see the issue in the **Done** lane, then open **Insights** (`/analytics`) to see the updated release-readiness score and throughput velocity.
+9. **Inspect Project Health**: Open **Insights** (`/analytics`) to see the updated release-readiness score (82%) and throughput velocity.
 10. **Personalize Your Studio**: Open the floating **Personalize** dock in the bottom-right corner. Change the project accent color (e.g. Sage `#75937E`), reorder your navigation, or adjust motion physics (`Still`, `Soft`, `Expressive`).
 
 ---
@@ -124,7 +146,7 @@ BugForge features a warm **editorial correspondence aesthetic** — combining pa
 
 ---
 
-## 🏆 The 5 Core Algorithmic & Security Moats
+## 🏆 The 6 Core Algorithmic & Security Moats
 
 ### 1. 🤖 Human-in-the-Loop AI Triage (Strict JSON Schema, Zero Autopilot)
 
@@ -156,7 +178,25 @@ sequenceDiagram
 
 ---
 
-### 2. 🛡️ Server-Enforced RBAC & Zero-Trust Architecture
+### 2. 🕸️ Interactive Blocker DAG & Critical Path Engine (with Cycle Prevention)
+
+Replaces static text dependency lists with an interactive visual DAG cockpit:
+
+- **Topological Layout & Critical Path**: Evaluates dependency subgraphs and highlights the longest unresolved blocking chain with an animated `#FF7164` pulsing stroke.
+- **Server-Side Cycle Detection**: Before committing any blocking relationship (`blocks` or `blocked_by`), the server performs a graph traversal across `issueLinks`. Circular dependencies (`A → B → A`) are rejected with `BAD_REQUEST: "Circular dependency detected: linking #X would create a circular blocking chain"`.
+- **Integrated Cockpit**: Visualized directly on the **Workboard** (`/boards`) and the **Issue Desk** (`/issues/:id`).
+
+---
+
+### 3. 🔍 Proactive Real-Time Duplicate Prevention in Intake
+
+- **As-You-Type Token Overlap & Trigram Scoring**: In `NewIssueDialog`, typing a problem title (debounced 250ms) triggers `issues.findSimilar`.
+- **Similarity Thresholds**: Scored using token intersection-over-union and substring matching against all existing project issues.
+- **Inline Warning**: Displays candidate duplicates with similarity percentages *before* form submission, stopping duplicate defect tickets before they enter the database.
+
+---
+
+### 4. 🛡️ Server-Enforced RBAC & Zero-Trust Architecture
 
 Client-side hidden buttons are purely for visual comfort; **every tRPC procedure independently verifies project/workspace membership and role rank on the server** before touching the database or storage.
 
@@ -177,7 +217,7 @@ Client-side hidden buttons are purely for visual comfort; **every tRPC procedure
 
 ---
 
-### 3. 🔒 Zero-Leakage Private Storage with Expiring Signed Reads
+### 5. 🔒 Zero-Leakage Private Storage with Expiring Signed Reads
 
 BugForge completely eliminates public bucket data leaks for attachments, project branding, and user avatars.
 
@@ -204,39 +244,48 @@ flowchart LR
 
 ---
 
-### 4. 📊 Deterministic Release-Readiness & Health Analytics
+### 6. 🐙 GitHub SCM Webhook & Commit Traceability Engine
 
-Instead of vague status summaries, BugForge uses inspectable mathematical formulas to compute project health, sprint blockers, and aging debt in [`server/db.ts`](server/db.ts) and [`client/src/pages/Home.tsx`](client/src/pages/Home.tsx):
-
-$$\text{Release Readiness (\%)} = \max\Big(0, \min\big(100, 100 - (18 \times \text{blockers}) - (4 \times \text{untriaged}) - (6 \times \text{overdue})\big)\Big)$$
-
-- **Release Blocker Penalty ($18\text{ pts}$)**: Critical bugs marked `isReleaseBlocker = true` or `severity = blocker`.
-- **Triage Debt Penalty ($4\text{ pts}$)**: Unscoped incoming reports lingering in `status = intake`.
-- **Overdue Penalty ($6\text{ pts}$)**: Open issues where `dueAt < NOW()`.
-- **Aging Triage Lanes**: Discrete tracking buckets for issues open $>7\text{ days}$, $>14\text{ days}$, and $>30\text{ days}$.
-- **Throughput Velocity**: Rolling 14-day count of verified closed issues ($t_{\text{resolved}} \le 14\text{ days}$).
+- **Live Webhook Endpoint (`/api/webhooks/github`)**: Listens for GitHub push webhook payloads.
+- **Smart Regex Issue Linking**: Parses commit messages for `#<number>`, `WEB-<number>`, `fixes #<number>`, and `closes #<number>`.
+- **Automatic Audit Entry**: Appends a verified `scm.commit_linked` event into the issue's immutable activity history with short SHA, author, and commit URL.
+- **Auto-Advance on Fix**: Commits declaring `fixes` or `closes` automatically transition active defects to `verify` lane.
 
 ---
 
-### 5. ⌨️ Keyboard-First Ergonomics & Correspondence Design System
-
-- **Spotlight Command Palette (`Cmd/Ctrl + K`)**: Built with `cmdk`, featuring fuzzy route jumping, quick filter presets (*Untriaged*, *Critical*, *Blockers*), project switching with visual accents, and instant saved query execution.
-- **Custom Precision Cursor**: Physics-based desktop cursor with trailing spring interpolation (`rx += (x - rx) * 0.16`), interactive hover expansion, and automatic bypass when `prefers-reduced-motion: reduce` or touch input is detected.
-- **Dynamic Accent Color Engine**: Project administrators select custom brand accents (`#A55343`, `#75937E`, `#C9A46A`, etc.) that dynamically inject `--project-accent` CSS custom properties into workspace lane headers, borders, and navigation.
-
----
-
-## 💻 Modern Developer Ergonomics
+## 💻 Modern Developer Ergonomics & Terminal CLI
 
 | Feature | Implementation | Developer Value |
 |---|---|---|
+| **Terminal CLI (`bugforge` / `bf`)** | `bin/bugforge.mjs` | Fast terminal issue listing, inspection, release stats, and persona listing |
 | **Spotlight Command Palette** | `cmdk` + Lucide | Instant `⌘K` jump to routes, projects, issue filters, or saved searches |
-| **5-Lane Workflow Board** | CSS Grid + Dynamic Theme Tokens | Clear stage visualization with blocker badges and direct detail links |
-| **Threaded Discussion & @Mentions** | Regex `@member-(\d+)` parser | Scoped team communication with real-time in-app notification routing |
-| **Relational Issue Linking** | `issueLinks` with Unique Constraint | Bi-directional relationship tracking: `relates_to`, `duplicates`, `blocked_by`, `blocks` |
-| **Immutable Audit History** | Append-only `issueActivity` table | Permanent tamper-proof audit trail for transitions, comments, attachments, and AI reviews |
-| **Custom Saved Filter Views** | `savedViews` + `userPreferences` | Personal query presets saved per user/project, syncing with URL query params |
+| **Interactive Blocker DAG** | SVG + Kahn's Engine | Visual blocker chains with critical path pulsing and cycle prevention |
+| **Proactive Duplicate Guard** | Debounced token similarity | Pre-submit warning alerting reporters of existing matching tickets |
+| **GitHub SCM Traceability** | Webhook parser | Commit SHA linking and automatic status promotion |
+| **5-Lane Workflow Board** | CSS Grid + Dynamic Tokens | Clear stage visualization with blocker badges and direct detail links |
 | **Personalization Dock** | Floating accessible drawer | Custom project accents, logo/avatar uploads, motion tuning, and reorderable menus |
+
+### 🖥️ Terminal CLI Quick Reference
+
+BugForge includes a standalone CLI client in `bin/bugforge.mjs`:
+
+```bash
+# List all active issues
+npx bugforge list
+
+# Filter issues by lane or severity
+npx bugforge list --status intake
+npx bugforge list --severity critical
+
+# Inspect detailed reproduction kit for an issue
+npx bugforge get 101
+
+# View calculated release-readiness metrics
+npx bugforge stats
+
+# Display 1-Click evaluator persona reference
+npx bugforge personas
+```
 
 ---
 
@@ -276,8 +325,6 @@ stateDiagram-v2
 | **Verify** | **Done** | `triage` or `admin` | **Mandatory Resolution**: `fixed`, `duplicate`, `wont_fix`, `invalid`, or `works_as_intended` | Sets `resolvedAt = NOW()`, notifies watchers |
 | **Done** | **In progress** | `triage` or `admin` | Reopen action | Clears `resolution` to `null`, clears `resolvedAt` |
 
-> **Error Handling**: An attempt to transition to `done` without a resolution code triggers HTTP 400 (`BAD_REQUEST: "A resolution is required before closing an issue."`). An unauthorized attempt triggers HTTP 403 (`FORBIDDEN: "You do not have permission to access this project."`).
-
 ---
 
 ## 🏗️ Architecture & Request Topology
@@ -288,17 +335,17 @@ BugForge uses a shared TypeScript codebase connecting a React 19 frontend with a
 sequenceDiagram
   autonumber
   participant Browser as React 19 + Vite Client
-  participant Auth as Supabase Auth (GitHub PKCE)
+  participant Auth as Supabase Auth / Demo Persona
   participant API as Vercel / Express tRPC API
   participant RBAC as Context & RBAC Guard
   participant DB as Supabase PostgreSQL
   participant Storage as Private Supabase Storage
 
-  Browser->>Auth: 1. OAuth PKCE Exchange (/auth/callback)
+  Browser->>Auth: 1. 1-Click Persona or GitHub PKCE
   Auth-->>Browser: 2. Return Session + Bearer Token
   Browser->>API: 3. tRPC Request with Authorization: Bearer <token>
-  API->>Auth: 4. Validate Token via /auth/v1/user
-  Auth-->>API: 5. Verified GitHub Identity
+  API->>Auth: 4. Validate Token (or resolve demo persona)
+  Auth-->>API: 5. Verified Identity & Role
   API->>RBAC: 6. Build Request Context & Check Project Role
   alt Insufficient Role
     RBAC-->>Browser: Return FORBIDDEN (HTTP 403)
@@ -313,55 +360,29 @@ sequenceDiagram
   end
 ```
 
-### Directory Structure
-
-```
-bugforge/
-├── client/                     # React 19 + Vite Single Page Application
-│   ├── src/
-│   │   ├── _core/hooks/        # useAuth (Supabase session synchronization)
-│   │   ├── components/         # CommandPalette, ProjectPersonalization, DashboardLayout, UI
-│   │   ├── contexts/           # ThemeContext (Light / Dark mode persistence)
-│   │   ├── hooks/              # useActiveProject, useComposition, useCorrespondenceSurface
-│   │   ├── lib/                # tRPC client, Supabase client, formatting helpers
-│   │   └── pages/              # Home (Overview), IssueExplorer, IssueDetail, Boards, Analytics, Inbox
-│   └── index.html              # HTML entry point with metadata
-├── server/                     # Express + tRPC API Layer
-│   ├── _core/                  # app.ts (shared app factory), context.ts, trpc.ts, supabaseAuth.ts, llm.ts
-│   ├── db.ts                   # Drizzle ORM queries, PostgreSQL connection pooler, RBAC helpers
-│   ├── routers.ts              # tRPC router definitions (auth, workspace, project, issues, views, etc.)
-│   ├── storage.ts              # Private Supabase Storage adapter & signed URL resolver
-│   └── *.test.ts               # Vitest unit & integration test suites
-├── drizzle/                    # Database definitions & migrations
-│   ├── schema.ts               # PostgreSQL Drizzle Schema (16 tables)
-│   └── *.sql                   # Generated migration files
-├── shared/                     # Shared constants, enums, and types
-├── tests/e2e/                  # Playwright end-to-end tests (GitHub Auth setup & flow)
-├── docs/                       # Complete engineering & architectural documentation (26+ guides)
-└── api/                        # Vercel Serverless Function entry point ([...path].ts)
-```
-
 ---
 
 ## 🔐 Authentication & Security Model
 
-- **GitHub OAuth via Supabase Auth**: End users authenticate using GitHub through PKCE. No raw GitHub client secrets ever touch client bundles or repository code.
-- **Single Source of Truth (`server/_core/supabaseAuth.ts`)**: Every protected tRPC call verifies the Supabase access token via HTTPS against `/auth/v1/user`, mapping confirmed email identities to internal user IDs.
-- **Zero-Trust Database Pool**: PostgreSQL is queried over an SSL-encrypted transaction pooler (`Pool` with `ssl: { rejectUnauthorized: false }`). Max connection limits are constrained to 1 on serverless to avoid connection exhaustion.
-- **Cascade Deletion Safeguards**: Deleting a workspace requires typing the exact workspace name and is wrapped in a single database transaction deleting all child issues, attachments, comments, watchers, links, and members atomically.
+- **1-Click Evaluator Personas**: Fast, zero-typing persona accounts configured for judges to test RBAC boundaries live.
+- **GitHub OAuth via Supabase Auth**: End users authenticate using GitHub through PKCE. No raw GitHub client secrets ever touch client bundles.
+- **Single Source of Truth (`server/_core/supabaseAuth.ts`)**: Every protected tRPC call verifies credentials over HTTPS, mapping confirmed identities to internal user IDs.
+- **Zero-Trust Database Pool**: PostgreSQL is queried over an SSL-encrypted transaction pooler (`Pool` with `ssl: { rejectUnauthorized: false }`).
+- **Cascade Deletion Safeguards**: Deleting a workspace requires typing the exact workspace name and is wrapped in a single database transaction deleting all child records atomically.
 
 ---
 
 ## 🧪 Automated Test Suite
 
 ```bash
-pnpm test
+npm test
 ```
 
 ### Test Suite Summary
 
 | Layer / Test File | Focus Area | Assertions | Status |
 |---|---|:---:|:---:|
+| `server/cycle-detection.test.ts` | Graph cycle algorithms & 1-click persona configurations | 2 | ✅ Pass |
 | `server/routers.authorization.test.ts` | Procedure role requirements & unauthorized rejection | 3 | ✅ Pass |
 | `server/routers.project-scope.test.ts` | Project-scoped isolation & cross-tenant barrier | 5 | ✅ Pass |
 | `server/db.permissions.test.ts` | Role rank calculations (`roleCan`) | 4 | ✅ Pass |
@@ -377,7 +398,7 @@ pnpm test
 | `server/_core/vercelRoute.test.ts` | Serverless handler mounting contract | 1 | ✅ Pass |
 | `client/src/components/CommandPalette.test.ts` | Saved search URL parameter construction | 2 | ✅ Pass |
 | `client/src/components/ProjectPersonalization.test.ts` | Hex color validation & CSS variable injection | 2 | ✅ Pass |
-| **Total Automated Coverage** | **15 Test Files** | **34 Tests** | **✅ 100% Passing** |
+| **Total Automated Coverage** | **16 Test Files** | **36 Tests** | **✅ 100% Passing** |
 
 ---
 
@@ -387,14 +408,14 @@ pnpm test
 
 | Command | Purpose |
 |---|---|
-| `pnpm dev` | Start local development server with Vite HMR and Express API |
-| `pnpm test` | Run complete Vitest suite |
-| `pnpm check` | Run strict TypeScript compiler verification (`tsc --noEmit`) |
-| `pnpm build:vercel` | Build client SPA and serverless bundle for Vercel production |
-| `pnpm build:managed` | Build bundle for standalone / managed runtime (rollback target) |
-| `pnpm format` | Format entire repository using Prettier |
-| `pnpm db:generate` | Generate Drizzle migration SQL from `drizzle/schema.ts` |
-| `pnpm e2e` | Run Playwright test suite |
+| `npm run dev` | Start local development server with Vite HMR and Express API |
+| `npm run cli` / `npx bugforge` | Run BugForge terminal CLI client |
+| `npm test` | Run complete Vitest suite |
+| `npm run check` | Run strict TypeScript compiler verification (`tsc --noEmit`) |
+| `npm run build:vercel` | Build client SPA and serverless bundle for Vercel production |
+| `npm run build:managed` | Build bundle for standalone / managed runtime (rollback target) |
+| `npm run format` | Format entire repository using Prettier |
+| `npm run db:generate` | Generate Drizzle migration SQL from `drizzle/schema.ts` |
 
 ---
 

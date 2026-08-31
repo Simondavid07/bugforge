@@ -12,9 +12,14 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
+    "cli": "node bin/bugforge.mjs",
     "db:generate": "drizzle-kit generate",
     "e2e:auth:setup": "tsx tests/e2e/auth.setup.ts",
     "e2e": "playwright test"
+  },
+  "bin": {
+    "bugforge": "./bin/bugforge.mjs",
+    "bf": "./bin/bugforge.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

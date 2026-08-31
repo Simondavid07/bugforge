@@ -5,6 +5,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -67,37 +69,120 @@ export default function DashboardLayout({
   );
 }
 function SignInGate() {
+  const { loginAsPersona } = useAuth();
+
+  const personas = [
+    {
+      key: "admin",
+      name: "Carol Danvers",
+      role: "Admin Lead",
+      badge: "👑 Full Access",
+      desc: "Workspace deletion, accent color settings, member governance",
+      color: "border-[#FF7164]/40 hover:border-[#FF7164] hover:bg-[#FFF5F4]",
+      accent: "bg-[#FF7164]/15 text-[#D14336]",
+    },
+    {
+      key: "triage",
+      name: "Eve Adams",
+      role: "Triage Lead",
+      badge: "🎯 Triage & AI",
+      desc: "Status moves, AI draft review & apply, release blocker toggles",
+      color: "border-[#F0C068]/40 hover:border-[#F0C068] hover:bg-[#FFFDF5]",
+      accent: "bg-[#F0C068]/20 text-[#A6781E]",
+    },
+    {
+      key: "developer",
+      name: "Alice Smith",
+      role: "Core Engineer",
+      badge: "💻 Member",
+      desc: "Edit issue reproduction, threaded comments, private file evidence",
+      color: "border-[#75937E]/40 hover:border-[#75937E] hover:bg-[#F4FAF6]",
+      accent: "bg-[#75937E]/20 text-[#2B5436]",
+    },
+    {
+      key: "viewer",
+      name: "Bob Jones",
+      role: "Reporter / QA",
+      badge: "👁️ Read-Only",
+      desc: "Create reports, test server-enforced rejection on restricted actions",
+      color: "border-[#839087]/30 hover:border-[#839087] hover:bg-[#F9FAF9]",
+      accent: "bg-[#839087]/15 text-[#526058]",
+    },
+  ];
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FAFAF6] px-5">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FAFAF6] px-5 py-12">
       <div className="absolute inset-0 paper-grid" />
-      <span className="absolute left-[9%] top-[13%] h-24 w-24 rounded-full bg-[#DCCEFF]" />
-      <span className="absolute bottom-[12%] right-[9%] h-28 w-28 rounded-[30px] bg-[#A8E6CF]" />
-      <div className="relative w-full max-w-md soft-card p-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF7164] text-[#18342C]">
-          <Command className="h-6 w-6" />
+      <span className="absolute left-[9%] top-[13%] h-32 w-32 rounded-full bg-[#DCCEFF]/60 blur-2xl" />
+      <span className="absolute bottom-[12%] right-[9%] h-36 w-36 rounded-[30px] bg-[#A8E6CF]/60 blur-2xl" />
+      
+      <div className="relative w-full max-w-2xl space-y-6">
+        <div className="soft-card p-8 text-center sm:text-left sm:flex sm:items-center sm:justify-between sm:gap-6">
+          <div className="space-y-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF7164] text-[#18342C] shadow-sm">
+              <Command className="h-6 w-6" />
+            </div>
+            <p className="eyebrow text-[#718079]">BugForge Platform</p>
+            <h1 className="display-heading text-3xl sm:text-4xl leading-[1.05]">
+              Ship calmer.<br />Fix smarter.
+            </h1>
+            <p className="text-sm leading-6 text-[#718079] max-w-sm">
+              Modern defect intelligence with calm correspondence design, human-reviewed AI triage, and private storage.
+            </p>
+          </div>
+          <div className="mt-6 sm:mt-0 flex flex-col items-stretch sm:min-w-[200px] border-t sm:border-t-0 sm:border-l border-[#E8EAE3] pt-5 sm:pt-0 sm:pl-6">
+            <p className="text-xs font-semibold text-[#8A978F] mb-3 uppercase tracking-wider">GitHub OAuth</p>
+            <Button
+              onClick={() => startLogin()}
+              className="h-11 w-full rounded-xl bg-[#18342C] font-semibold text-white shadow-md hover:bg-[#264B40]"
+            >
+              Continue with GitHub
+            </Button>
+            <span className="mt-2 text-[11px] text-center text-[#8A978F]">Standard OAuth & PKCE</span>
+          </div>
         </div>
-        <p className="eyebrow mt-7 text-[#718079]">BugForge</p>
-        <h1 className="display-heading mt-3 text-4xl leading-[.96]">
-          Ship calmer.
-          <br />
-          Fix smarter.
-        </h1>
-        <p className="mt-5 text-sm leading-6 text-[#718079]">
-          A friendly home for issue triage, team context, and release-ready
-          confidence.
-        </p>
-        <Button
-          onClick={() => startLogin()}
-          className="mt-8 h-11 w-full rounded-xl bg-[#18342C] font-semibold text-white hover:bg-[#264B40]"
-        >
-          Continue with GitHub
-        </Button>
+
+        <div className="soft-card p-6 sm:p-7">
+          <div className="flex items-center justify-between border-b border-[#E8EAE3] pb-4 mb-5">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="flex h-2 w-2 rounded-full bg-[#3ECF8E] animate-ping" />
+                <h2 className="font-semibold text-base text-[#18342C]">⚡ 1-Click Fast Evaluator Personas</h2>
+              </div>
+              <p className="text-xs text-[#718079] mt-0.5">
+                Instant authentication with pre-seeded workspace & project roles — zero typing required for judges.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {personas.map(p => (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => void loginAsPersona(p.key)}
+                className={`group flex flex-col text-left p-4 rounded-xl border bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm hover:shadow-md ${p.color}`}
+              >
+                <div className="flex items-center justify-between w-full mb-1.5">
+                  <span className="font-bold text-sm text-[#18342C] group-hover:text-[#10251F]">
+                    {p.name}
+                  </span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${p.accent}`}>
+                    {p.badge}
+                  </span>
+                </div>
+                <p className="text-[11px] font-medium text-[#718079] mb-1.5">{p.role}</p>
+                <p className="text-[11px] leading-relaxed text-[#8A978F] line-clamp-2">{p.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 function Shell({ children }: { children: React.ReactNode }) {
-  const { user, logout } = useAuth();
+  const { user, logout, demoPersona, loginAsPersona } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
@@ -257,7 +342,61 @@ function Shell({ children }: { children: React.ReactNode }) {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 rounded-xl border border-[#E1E5DB] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#18342C] shadow-sm hover:bg-[#F1F2EA] transition-colors"
+                >
+                  <span className="h-2 w-2 rounded-full bg-[#3ECF8E]" />
+                  <span className="hidden sm:inline text-[#718079]">Role:</span>
+                  <span>
+                    {demoPersona === "admin"
+                      ? "👑 Carol (Admin)"
+                      : demoPersona === "triage"
+                      ? "🎯 Eve (Triage)"
+                      : demoPersona === "viewer"
+                      ? "👁️ Bob (Viewer)"
+                      : demoPersona === "developer"
+                      ? "💻 Alice (Dev)"
+                      : user?.name ?? "Demo User"}
+                  </span>
+                  <ChevronDown className="h-3 w-3 text-[#8A978F]" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60 rounded-xl p-1.5 shadow-xl bg-white border border-[#E8EAE3]">
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-wider font-bold text-[#8A978F] px-2 py-1">
+                  ⚡ Fast Evaluator Switcher
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => void loginAsPersona("admin")}
+                  className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#FFF5F4] focus:bg-[#FFF5F4]"
+                >
+                  👑 Carol Danvers (Admin)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => void loginAsPersona("triage")}
+                  className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#FFFDF5] focus:bg-[#FFFDF5]"
+                >
+                  🎯 Eve Adams (Triage Lead)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => void loginAsPersona("developer")}
+                  className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#F4FAF6] focus:bg-[#F4FAF6]"
+                >
+                  💻 Alice Smith (Core Dev)
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => void loginAsPersona("viewer")}
+                  className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#F9FAF9] focus:bg-[#F9FAF9]"
+                >
+                  👁️ Bob Jones (Viewer / QA)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="hidden items-center gap-2 rounded-xl border border-[#E1E5DB] bg-white px-3 py-2 text-xs text-[#839087] lg:flex">
               <Command className="h-3.5 w-3.5" />
               Quick find{" "}

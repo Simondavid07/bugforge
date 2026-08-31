@@ -17,12 +17,36 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
+const DEMO_PERSONA_STORAGE_KEY = "bugforge_demo_token";
 let accessToken: string | null = null;
 
 export function setSupabaseAccessToken(token: string | null) {
   accessToken = token;
 }
 
+export function setDemoPersonaToken(personaKey: string | null) {
+  if (typeof window !== "undefined") {
+    if (personaKey) {
+      localStorage.setItem(DEMO_PERSONA_STORAGE_KEY, `demo:${personaKey}`);
+      accessToken = `demo:${personaKey}`;
+    } else {
+      localStorage.removeItem(DEMO_PERSONA_STORAGE_KEY);
+      accessToken = null;
+    }
+  }
+}
+
+export function getActiveDemoPersona(): string | null {
+  if (typeof window === "undefined") return null;
+  const stored = localStorage.getItem(DEMO_PERSONA_STORAGE_KEY);
+  return stored && stored.startsWith("demo:") ? stored.slice(5) : null;
+}
+
 export function getSupabaseAccessToken() {
+  if (typeof window !== "undefined") {
+    const demo = localStorage.getItem(DEMO_PERSONA_STORAGE_KEY);
+    if (demo) return demo;
+  }
   return accessToken;
 }
+

@@ -548,3 +548,344 @@ export const issueEnums = {
     "works_as_intended",
   ] as const,
 };
+
+export type DemoPersonaKey = "admin" | "triage" | "developer" | "viewer";
+
+export const DEMO_PERSONAS: Record<
+  DemoPersonaKey,
+  {
+    key: DemoPersonaKey;
+    name: string;
+    email: string;
+    role: "admin" | "user";
+    workspaceRole: "admin" | "member" | "viewer";
+    projectRole: ProjectRole;
+    title: string;
+    description: string;
+  }
+> = {
+  admin: {
+    key: "admin",
+    name: "Carol Danvers (Admin)",
+    email: "admin@bugforge.demo",
+    role: "admin",
+    workspaceRole: "admin",
+    projectRole: "admin",
+    title: "System & Workspace Admin",
+    description: "Full platform governance: workspace deletion, accent customization, member roles",
+  },
+  triage: {
+    key: "triage",
+    name: "Eve Adams (Triage Lead)",
+    email: "triage@bugforge.demo",
+    role: "user",
+    workspaceRole: "member",
+    projectRole: "triage",
+    title: "Triage & Release Coordinator",
+    description: "Issue lifecycle transitions, developer assignments, AI draft reviews, release blockers",
+  },
+  developer: {
+    key: "developer",
+    name: "Alice Smith (Core Developer)",
+    email: "dev@bugforge.demo",
+    role: "user",
+    workspaceRole: "member",
+    projectRole: "member",
+    title: "Core Platform Engineer",
+    description: "Edit issue details, reproduction steps, threaded comments, private attachments, issue links",
+  },
+  viewer: {
+    key: "viewer",
+    name: "Bob Jones (Reporter / Viewer)",
+    email: "viewer@bugforge.demo",
+    role: "user",
+    workspaceRole: "viewer",
+    projectRole: "viewer",
+    title: "External Reporter / QA",
+    description: "Read-only access: demonstrates server-enforced rejection on unauthorized modifications",
+  },
+};
+
+export async function seedDemoIssues(
+  db: ReturnType<typeof drizzle<typeof schema>>,
+  projectId: number,
+  userId: number
+) {
+  const existing = await db
+    .select({ count: max(issues.number) })
+    .from(issues)
+    .where(eq(issues.projectId, projectId));
+  if (Number(existing[0]?.count ?? 0) > 0) return;
+
+  const [labelA11y, labelRel, labelSec] = await Promise.all([
+    db.insert(labels).values({ projectId, name: "accessibility", color: "#DCCEFF" }).returning({ id: labels.id }),
+    db.insert(labels).values({ projectId, name: "release", color: "#FFD8D2" }).returning({ id: labels.id }),
+    db.insert(labels).values({ projectId, name: "security", color: "#A8E6CF" }).returning({ id: labels.id }),
+  ]);
+
+  const demoItems = [
+    {
+      number: 101,
+      title: "Keyboard focus is lost after saving a saved search",
+      description: "When submitting the modal form, the focus drops to body instead of returning to the button.",
+      expectedResult: "Focus returns to the trigger button.",
+      actualResult: "Focus is reset to document body.",
+      reproducibleSteps: "1. Open Search\n2. Save view\n3. Press Tab",
+      severity: "major" as const,
+      priority: "high" as const,
+      status: "intake" as const,
+      isReleaseBlocker: false,
+    },
+    {
+      number: 102,
+      title: "Project accent preview does not announce the selected color",
+      description: "Screen readers do not receive live region updates when a new hex accent is selected.",
+      expectedResult: "Live region announces 'Selected Sage Green'.",
+      actualResult: "Silent update.",
+      reproducibleSteps: "1. Open Personalize\n2. Click accent #75937E\n3. Inspect ARIA announcement",
+      severity: "minor" as const,
+      priority: "medium" as const,
+      status: "triage" as const,
+      isReleaseBlocker: false,
+    },
+    {
+      number: 103,
+      title: "Release blocker banner remains visible after verification",
+      description: "The critical blocker banner fails to unmount after transitioning to verify state.",
+      expectedResult: "Banner clears once issue passes verify.",
+      actualResult: "Banner persists indefinitely.",
+      reproducibleSteps: "1. Open WEB-103\n2. Move to Verify\n3. Check Overview radar",
+      severity: "critical" as const,
+      priority: "urgent" as const,
+      status: "in_progress" as const,
+      isReleaseBlocker: true,
+    },
+    {
+      number: 104,
+      title: "Attachment download should return an expiring authorized URL",
+      description: "Private attachments must resolve through short-lived signed URLs with 15m TTL.",
+      expectedResult: "Signed URL expires after 900 seconds.",
+      actualResult: "Works as expected under Supabase Storage.",
+      reproducibleSteps: "1. Upload PNG evidence\n2. Inspect storageUrl marker\n3. Verify signature TTL",
+      severity: "major" as const,
+      priority: "high" as const,
+      status: "verify" as const,
+      isReleaseBlocker: false,
+    },
+    {
+      number: 105,
+      title: "Duplicate reports should preserve the original issue link",
+      description: "Closing an issue as duplicate must retain the bidirectional relation link.",
+      expectedResult: "Duplicate link renders with badge.",
+      actualResult: "Linked successfully.",
+      reproducibleSteps: "1. Move to Done with resolution duplicate\n2. Check issue links",
+      severity: "minor" as const,
+      priority: "low" as const,
+      status: "done" as const,
+      resolution: "duplicate" as const,
+      isReleaseBlocker: false,
+    },
+    {
+      number: 106,
+      title: "Insights aging lane uses the project timezone consistently",
+      description: "Date calculations for aging buckets must normalize to UTC milliseconds.",
+      expectedResult: "Aging buckets calculate consistently.",
+      actualResult: "Normalized to UTC.",
+      reproducibleSteps: "1. Open Insights\n2. Inspect 7d, 14d, 30d lanes",
+      severity: "major" as const,
+      priority: "medium" as const,
+      status: "done" as const,
+      resolution: "fixed" as const,
+      isReleaseBlocker: false,
+    },
+    {
+      number: 107,
+      title: "Human-reviewed summary draft omits the environment field",
+      description: "AI draft generation should advise on test steps and caveats for reproduction.",
+      expectedResult: "Draft provides structured test steps.",
+      actualResult: "Draft stored with pending_review.",
+      reproducibleSteps: "1. Open WEB-107\n2. Click AI review draft\n3. Review draft fields",
+      severity: "major" as const,
+      priority: "medium" as const,
+      status: "triage" as const,
+      isReleaseBlocker: false,
+    },
+    {
+      number: 108,
+      title: "Watcher notification should identify the changed status",
+      description: "Notifications dispatched on status_change events must include the new lane name.",
+      expectedResult: "Notification title says 'Status changed to verify'.",
+      actualResult: "Formatted with statusMeta.",
+      reproducibleSteps: "1. Toggle watch\n2. Move issue status\n3. Check Inbox",
+      severity: "minor" as const,
+      priority: "low" as const,
+      status: "intake" as const,
+      isReleaseBlocker: false,
+    },
+  ];
+
+  const createdIssues: Array<{ id: number; number: number }> = [];
+  for (const item of demoItems) {
+    const [created] = await db
+      .insert(issues)
+      .values({
+        projectId,
+        number: item.number,
+        title: item.title,
+        description: item.description,
+        expectedResult: item.expectedResult,
+        actualResult: item.actualResult,
+        reproducibleSteps: item.reproducibleSteps,
+        severity: item.severity,
+        priority: item.priority,
+        status: item.status,
+        resolution: (item as { resolution?: (typeof issueEnums.resolution)[number] }).resolution ?? null,
+        reporterId: userId,
+        assigneeId: userId,
+        isReleaseBlocker: item.isReleaseBlocker,
+        triagedAt: item.status !== "intake" ? new Date() : null,
+        resolvedAt: item.status === "done" ? new Date() : null,
+      })
+      .returning({ id: issues.id, number: issues.number });
+    if (created) createdIssues.push(created);
+  }
+
+  if (createdIssues[2] && createdIssues[0]) {
+    await db.insert(issueLinks).values({
+      issueId: createdIssues[2].id,
+      linkedIssueId: createdIssues[0].id,
+      type: "blocks",
+      createdById: userId,
+    });
+  }
+  if (createdIssues[0] && createdIssues[3]) {
+    await db.insert(issueLinks).values({
+      issueId: createdIssues[0].id,
+      linkedIssueId: createdIssues[3].id,
+      type: "blocks",
+      createdById: userId,
+    });
+  }
+
+  if (createdIssues[0]) {
+    await db.insert(comments).values({
+      issueId: createdIssues[0].id,
+      authorId: userId,
+      body: "Confirmed on Safari 17.4 and Chrome 124. When pressing Enter to save, focus resets to body.",
+    });
+  }
+}
+
+export async function ensureDemoPersonaUser(personaKey: string): Promise<typeof users.$inferSelect> {
+  const db = await requireDb();
+  const normalizedKey = (personaKey in DEMO_PERSONAS ? personaKey : "developer") as DemoPersonaKey;
+  const persona = DEMO_PERSONAS[normalizedKey];
+  const openId = `demo:${normalizedKey}`;
+
+  await upsertUser({
+    openId,
+    name: persona.name,
+    email: persona.email,
+    loginMethod: "demo",
+    role: persona.role,
+  });
+
+  const user = await getUserByOpenId(openId);
+  if (!user) throw new Error("Demo persona user could not be initialized");
+
+  const existingWorkspaces = await db.select().from(workspaces).limit(5);
+  if (existingWorkspaces.length > 0) {
+    for (const ws of existingWorkspaces) {
+      await db
+        .insert(workspaceMembers)
+        .values({
+          workspaceId: ws.id,
+          userId: user.id,
+          role: persona.workspaceRole,
+        })
+        .onConflictDoUpdate({
+          target: [workspaceMembers.workspaceId, workspaceMembers.userId],
+          set: { role: persona.workspaceRole },
+        });
+
+      const wsProjects = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.workspaceId, ws.id));
+      for (const prj of wsProjects) {
+        await db
+          .insert(projectMembers)
+          .values({
+            projectId: prj.id,
+            userId: user.id,
+            role: persona.projectRole,
+          })
+          .onConflictDoUpdate({
+            target: [projectMembers.projectId, projectMembers.userId],
+            set: { role: persona.projectRole },
+          });
+      }
+    }
+  } else {
+    const { projectId } = await createWorkspaceWithProject({
+      userId: user.id,
+      workspaceName: "Northstar Demo Workspace",
+      projectName: "Web Console",
+      projectKey: "WEB",
+    });
+    await seedDemoIssues(db, projectId, user.id);
+  }
+
+  return user;
+}
+
+export async function wouldCreateBlockCycle(
+  issueId: number,
+  linkedIssueId: number,
+  type: "blocks" | "blocked_by" | "relates_to" | "duplicates"
+): Promise<boolean> {
+  if (type !== "blocks" && type !== "blocked_by") return false;
+  const db = await requireDb();
+
+  const source = type === "blocks" ? issueId : linkedIssueId;
+  const target = type === "blocks" ? linkedIssueId : issueId;
+
+  if (source === target) return true;
+
+  const allLinks = await db
+    .select({
+      issueId: issueLinks.issueId,
+      linkedIssueId: issueLinks.linkedIssueId,
+      type: issueLinks.type,
+    })
+    .from(issueLinks);
+
+  const adj = new Map<number, number[]>();
+  for (const l of allLinks) {
+    if (l.type === "blocks") {
+      const list = adj.get(l.issueId) ?? [];
+      list.push(l.linkedIssueId);
+      adj.set(l.issueId, list);
+    } else if (l.type === "blocked_by") {
+      const list = adj.get(l.linkedIssueId) ?? [];
+      list.push(l.issueId);
+      adj.set(l.linkedIssueId, list);
+    }
+  }
+
+  const queue = [target];
+  const visited = new Set<number>([target]);
+  while (queue.length > 0) {
+    const curr = queue.shift()!;
+    if (curr === source) return true;
+    for (const next of adj.get(curr) ?? []) {
+      if (!visited.has(next)) {
+        visited.add(next);
+        queue.push(next);
+      }
+    }
+  }
+
+  return false;
+}
+

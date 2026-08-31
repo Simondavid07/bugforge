@@ -80,6 +80,11 @@ export async function authenticateRequest(req: AuthenticatedRequest) {
   const accessToken = bearerToken(req);
   if (!accessToken) throw new Error("Missing Supabase access token");
 
+  if (accessToken.startsWith("demo:")) {
+    const personaKey = accessToken.slice(5).trim();
+    return await db.ensureDemoPersonaUser(personaKey);
+  }
+
   const authUser = await getSupabaseUser(accessToken);
   if (!authUser.id) throw new Error("Supabase user id is missing");
 

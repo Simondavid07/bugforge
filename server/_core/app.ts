@@ -3,6 +3,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerStorageProxy } from "./storageProxy.js";
 import { appRouter } from "../routers.js";
 import { createContext } from "./context.js";
+import { handleGitHubWebhook } from "./scmWebhook.js";
 
 /**
  * Creates only the request-handling layer. The managed runtime attaches Vite/static
@@ -14,6 +15,7 @@ export function createBugForgeApp() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
+  app.post("/api/webhooks/github", handleGitHubWebhook);
   app.use(
     "/api/trpc",
     createExpressMiddleware({

@@ -34,6 +34,7 @@ import {
   requireDb,
   requireProjectRole,
   roleCan,
+  wouldCreateBlockCycle,
 } from "./db.js";
 import { invokeLLM, listLLMModels } from "./_core/llm.js";
 import { resolveStorageUrl, storageGetSignedUrl, storagePut } from "./storage.js";
@@ -824,6 +825,12 @@ export const appRouter = router({
             code: "BAD_REQUEST",
             message: "An issue cannot link to itself.",
           });
+        if (await wouldCreateBlockCycle(input.issueId, linked.id, input.type)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Circular dependency detected: linking #${linked.number} would create a circular blocking chain.`,
+          });
+        }
         await db
           .insert(issueLinks)
           .values({
@@ -847,6 +854,164 @@ export const appRouter = router({
           message: `Linked issue #${linked.number} as ${input.type}`,
         });
         return { success: true };
+      }),
+    dependencyGraph: protectedProcedure
+      .input(projectIdInput)
+      .query(async ({ ctx, input }) => {
+        const db = await requireDb();
+        await access(ctx.user.id, input.projectId);
+
+        const projectIssues = await db
+          .select({
+            id: issues.id,
+            number: issues.number,
+            title: issues.title,
+            status: issues.status,
+            severity: issues.severity,
+            priority: issues.priority,
+            isReleaseBlocker: issues.isReleaseBlocker,
+          })
+          .from(issues)
+          .where(eq(issues.projectId, input.projectId));
+
+        const issueIds = projectIssues.map(i => i.id);
+        if (!issueIds.length) {
+          return { nodes: [], edges: [], criticalPath: [] };
+        }
+
+        const linkRows = await db
+          .select()
+          .from(issueLinks)
+          .where(
+            and(
+              inArray(issueLinks.issueId, issueIds),
+              inArray(issueLinks.linkedIssueId, issueIds)
+            )
+          );
+
+        const edges: Array<{ id: number; source: number; target: number; type: string }> = [];
+        const adj = new Map<number, number[]>();
+        const inDegree = new Map<number, number>();
+
+        for (const i of projectIssues) {
+          inDegree.set(i.id, 0);
+          adj.set(i.id, []);
+        }
+
+        for (const l of linkRows) {
+          if (l.type === "blocks") {
+            edges.push({ id: l.id, source: l.issueId, target: l.linkedIssueId, type: "blocks" });
+            adj.get(l.issueId)?.push(l.linkedIssueId);
+            inDegree.set(l.linkedIssueId, (inDegree.get(l.linkedIssueId) ?? 0) + 1);
+          } else if (l.type === "blocked_by") {
+            edges.push({ id: l.id, source: l.linkedIssueId, target: l.issueId, type: "blocks" });
+            adj.get(l.linkedIssueId)?.push(l.issueId);
+            inDegree.set(l.issueId, (inDegree.get(l.issueId) ?? 0) + 1);
+          }
+        }
+
+        const openNodes = new Set(projectIssues.filter(i => i.status !== "done").map(i => i.id));
+        let longestPath: number[] = [];
+
+        function dfs(curr: number, currentPath: number[]) {
+          const nextNodes = (adj.get(curr) ?? []).filter(n => openNodes.has(n));
+          if (nextNodes.length === 0) {
+            if (currentPath.length > longestPath.length) {
+              longestPath = [...currentPath];
+            }
+            return;
+          }
+          for (const next of nextNodes) {
+            if (!currentPath.includes(next)) {
+              currentPath.push(next);
+              dfs(next, currentPath);
+              currentPath.pop();
+            }
+          }
+        }
+
+        for (const i of projectIssues) {
+          if (openNodes.has(i.id) && (inDegree.get(i.id) === 0 || edges.length > 0)) {
+            dfs(i.id, [i.id]);
+          }
+        }
+
+        return {
+          nodes: projectIssues,
+          edges,
+          criticalPath: longestPath.length > 1 ? longestPath : [],
+        };
+      }),
+    findSimilar: protectedProcedure
+      .input(
+        z.object({
+          projectId: z.number().int().positive(),
+          title: z.string().trim().min(3).max(250),
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        const db = await requireDb();
+        await access(ctx.user.id, input.projectId);
+
+        const projectIssues = await db
+          .select({
+            id: issues.id,
+            number: issues.number,
+            title: issues.title,
+            status: issues.status,
+            severity: issues.severity,
+          })
+          .from(issues)
+          .where(eq(issues.projectId, input.projectId))
+          .limit(100);
+
+        const queryTokens = Array.from(
+          new Set(
+            input.title
+              .toLowerCase()
+              .replace(/[^a-z0-9\s]/g, "")
+              .split(/\s+/)
+              .filter(w => w.length >= 3)
+          )
+        );
+
+        if (!queryTokens.length) return { duplicates: [] };
+
+        const scored = projectIssues
+          .map(issue => {
+            const issueTokens = Array.from(
+              new Set(
+                issue.title
+                  .toLowerCase()
+                  .replace(/[^a-z0-9\s]/g, "")
+                  .split(/\s+/)
+                  .filter(w => w.length >= 3)
+              )
+            );
+            if (!issueTokens.length) return { ...issue, similarityScore: 0 };
+
+            const issueSet = new Set(issueTokens);
+            let overlap = 0;
+            for (let i = 0; i < queryTokens.length; i++) {
+              if (issueSet.has(queryTokens[i])) overlap++;
+            }
+            const allTokens = queryTokens.concat(issueTokens);
+            const unionSize = new Set(allTokens).size;
+            let score = unionSize > 0 ? Math.round((overlap / unionSize) * 100) : 0;
+
+            const qLower = input.title.toLowerCase();
+            const iLower = issue.title.toLowerCase();
+            if (iLower.includes(qLower) || qLower.includes(iLower)) {
+              score = Math.max(score, 75);
+            }
+
+            return { ...issue, similarityScore: score };
+          })
+          .filter(i => i.similarityScore >= 20)
+          .sort((a, b) => b.similarityScore - a.similarityScore)
+          .slice(0, 3);
+
+        return { duplicates: scored };
       }),
   }),
 

@@ -1,30 +1,313 @@
 import { Badge } from "@/components/ui/badge";
 import { useCorrespondenceSurface } from "@/hooks/useCorrespondenceSurface";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useActiveProject } from "@/hooks/useActiveProject";
 import { statusMeta } from "@/lib/bugforge";
 import { trpc } from "@/lib/trpc";
-import { Filter, Plus, Search } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { AlertCircle, ExternalLink, Filter, Plus, Search } from "lucide-react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 
-export default function IssueExplorer() { useCorrespondenceSurface("issues");
+export default function IssueExplorer() {
+  useCorrespondenceSurface("issues");
   const { projectId, activeProject } = useActiveProject();
   const [location, setLocation] = useLocation();
-  const filters = useMemo(() => { const params = new URLSearchParams(location.split("?")[1] ?? ""); const status = params.get("status"); const severity = params.get("severity"); return { query: params.get("q") ?? "", status: ["intake", "triage", "in_progress", "verify", "done"].includes(status ?? "") ? status as "intake" | "triage" | "in_progress" | "verify" | "done" : undefined, severity: ["blocker", "critical", "major", "minor", "trivial"].includes(severity ?? "") ? severity as "blocker" | "critical" | "major" | "minor" | "trivial" : undefined }; }, [location]);
+  const filters = useMemo(() => {
+    const params = new URLSearchParams(location.split("?")[1] ?? "");
+    const status = params.get("status");
+    const severity = params.get("severity");
+    return {
+      query: params.get("q") ?? "",
+      status: [
+        "intake",
+        "triage",
+        "in_progress",
+        "verify",
+        "done",
+      ].includes(status ?? "")
+        ? (status as
+            | "intake"
+            | "triage"
+            | "in_progress"
+            | "verify"
+            | "done")
+        : undefined,
+      severity: [
+        "blocker",
+        "critical",
+        "major",
+        "minor",
+        "trivial",
+      ].includes(severity ?? "")
+        ? (severity as
+            | "blocker"
+            | "critical"
+            | "major"
+            | "minor"
+            | "trivial")
+        : undefined,
+    };
+  }, [location]);
   const [query, setQuery] = useState("");
   const activeQuery = query || filters.query;
-  const issues = trpc.issues.list.useQuery({ projectId: projectId ?? 0, query: activeQuery || undefined, status: filters.status, severity: filters.severity, page: 1, pageSize: 30, sort: "updated" }, { enabled: Boolean(projectId) });
+  const issues = trpc.issues.list.useQuery(
+    {
+      projectId: projectId ?? 0,
+      query: activeQuery || undefined,
+      status: filters.status,
+      severity: filters.severity,
+      page: 1,
+      pageSize: 30,
+      sort: "updated",
+    },
+    { enabled: Boolean(projectId) }
+  );
   const items = issues.data?.items ?? [];
   if (!projectId) return <CleanExplorerEmpty />;
-  return <div className="mx-auto max-w-[1500px] space-y-5"><section className="flex flex-col justify-between gap-5 rounded-[28px] border border-[#E1E5DB] bg-white p-7 shadow-[0_16px_42px_rgba(27,60,45,.07)] md:flex-row md:items-end"><div><p className="eyebrow text-[#718079]">{activeProject?.key ?? "Project"} · discovery surface</p><h1 className="display-heading mt-3 text-4xl">Find the right thread.</h1><p className="mt-2 text-sm text-[#718079]">Search, sort, and move work forward with a little more ease.</p></div><NewIssueDialog projectId={projectId} onCreated={id => setLocation(`/issues/${id}`)} /></section><section className="rounded-[24px] border border-[#E1E5DB] bg-white p-4 shadow-[0_14px_34px_rgba(27,60,45,.06)]"><div className="relative"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#718079]" /><Input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search title or report details" className="h-12 pl-11" /></div><p className="mt-3 text-xs text-[#718079]">{issues.data?.total ?? 0} matching signals · sorted by latest update</p></section><section className="overflow-hidden rounded-[24px] border border-[#E1E5DB] bg-white shadow-[0_14px_34px_rgba(27,60,45,.06)]"><div className="hidden grid-cols-[80px_1fr_130px_120px] gap-4 border-b border-[#E9EDE4] bg-[#FAFAF6] px-6 py-3 text-[10px] font-medium uppercase tracking-[.13em] text-[#718079] md:grid"><span>ID</span><span>Issue</span><span>Status</span><span>Updated</span></div>{issues.isLoading ? <ListLoading /> : items.length ? items.map(issue => <button key={issue.id} onClick={() => setLocation(`/issues/${issue.id}`)} className="group grid w-full gap-3 border-b border-[#E9EDE4] px-5 py-5 text-left hover:bg-[#FFFDF7] md:grid-cols-[80px_1fr_130px_120px] md:items-center md:gap-4 md:px-6"><span className="font-mono text-xs text-[#718079]">#{issue.number}</span><span className="min-w-0"><span className="block truncate text-sm font-semibold group-hover:text-[#FF7164]">{issue.title}</span><span className="mt-2 flex flex-wrap gap-1">{issue.labels.map(label => <span key={label.id} style={{ backgroundColor: label.color }} className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-[#19352D]">{label.name}</span>)}</span></span><Badge className={`w-fit rounded-full border-0 px-2.5 py-1 text-[10px] ${statusMeta[issue.status].className}`}>{statusMeta[issue.status].label}</Badge><span className="text-xs text-[#718079]">{new Date(issue.updatedAt).toLocaleDateString()}</span></button>) : <div className="p-14 text-center"><Filter className="mx-auto h-7 w-7 text-[#FF7164]" /><p className="display-heading mt-4 text-2xl">Nothing is hiding here.</p><p className="mt-2 text-sm text-[#718079]">Try a different phrase or add a new report.</p></div>}</section></div>;
+  return (
+    <div className="mx-auto max-w-[1500px] space-y-5">
+      <section className="flex flex-col justify-between gap-5 rounded-[28px] border border-[#E1E5DB] bg-white p-7 shadow-[0_16px_42px_rgba(27,60,45,.07)] md:flex-row md:items-end">
+        <div>
+          <p className="eyebrow text-[#718079]">
+            {activeProject?.key ?? "Project"} · discovery surface
+          </p>
+          <h1 className="display-heading mt-3 text-4xl">Find the right thread.</h1>
+          <p className="mt-2 text-sm text-[#718079]">
+            Search, sort, and move work forward with a little more ease.
+          </p>
+        </div>
+        <NewIssueDialog
+          projectId={projectId}
+          onCreated={id => setLocation(`/issues/${id}`)}
+        />
+      </section>
+      <section className="rounded-[24px] border border-[#E1E5DB] bg-white p-4 shadow-[0_14px_34px_rgba(27,60,45,.06)]">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#718079]" />
+          <Input
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            placeholder="Search title or report details"
+            className="h-12 pl-11"
+          />
+        </div>
+        <p className="mt-3 text-xs text-[#718079]">
+          {issues.data?.total ?? 0} matching signals · sorted by latest update
+        </p>
+      </section>
+      <section className="overflow-hidden rounded-[24px] border border-[#E1E5DB] bg-white shadow-[0_14px_34px_rgba(27,60,45,.06)]">
+        <div className="hidden grid-cols-[80px_1fr_130px_120px] gap-4 border-b border-[#E9EDE4] bg-[#FAFAF6] px-6 py-3 text-[10px] font-medium uppercase tracking-[.13em] text-[#718079] md:grid">
+          <span>ID</span>
+          <span>Issue</span>
+          <span>Status</span>
+          <span>Updated</span>
+        </div>
+        {issues.isLoading ? (
+          <ListLoading />
+        ) : items.length ? (
+          items.map(issue => (
+            <button
+              key={issue.id}
+              onClick={() => setLocation(`/issues/${issue.id}`)}
+              className="group grid w-full gap-3 border-b border-[#E9EDE4] px-5 py-5 text-left hover:bg-[#FFFDF7] md:grid-cols-[80px_1fr_130px_120px] md:items-center md:gap-4 md:px-6"
+            >
+              <span className="font-mono text-xs text-[#718079]">
+                #{issue.number}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold group-hover:text-[#FF7164]">
+                  {issue.title}
+                </span>
+                <span className="mt-2 flex flex-wrap gap-1">
+                  {issue.labels.map(label => (
+                    <span
+                      key={label.id}
+                      style={{ backgroundColor: label.color }}
+                      className="rounded-full px-2 py-0.5 text-[9px] font-semibold text-[#19352D]"
+                    >
+                      {label.name}
+                    </span>
+                  ))}
+                </span>
+              </span>
+              <Badge
+                className={`w-fit rounded-full border-0 px-2.5 py-1 text-[10px] ${statusMeta[issue.status].className}`}
+              >
+                {statusMeta[issue.status].label}
+              </Badge>
+              <span className="text-xs text-[#718079]">
+                {new Date(issue.updatedAt).toLocaleDateString()}
+              </span>
+            </button>
+          ))
+        ) : (
+          <div className="p-14 text-center">
+            <Filter className="mx-auto h-7 w-7 text-[#FF7164]" />
+            <p className="display-heading mt-4 text-2xl">Nothing is hiding here.</p>
+            <p className="mt-2 text-sm text-[#718079]">
+              Try a different phrase or add a new report.
+            </p>
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }
 
-function NewIssueDialog({ projectId, onCreated }: { projectId: number; onCreated: (id: number) => void }) { const utils = trpc.useUtils(); const create = trpc.issues.create.useMutation({ onSuccess: result => { utils.issues.list.invalidate(); utils.project.overview.invalidate(); onCreated(result.issueId); } }); const [open, setOpen] = useState(false); const [title, setTitle] = useState(""); const [description, setDescription] = useState(""); const [steps, setSteps] = useState(""); const submit = async (event: FormEvent) => { event.preventDefault(); await create.mutateAsync({ projectId, title, description, reproducibleSteps: steps }); setOpen(false); }; return <Dialog open={open} onOpenChange={setOpen}><DialogTrigger asChild><Button className="rounded-xl bg-[#FF7164] font-semibold text-[#19352D] shadow-[0_8px_18px_rgba(255,113,100,.24)] hover:bg-[#FF8A7E]"><Plus className="mr-2 h-4 w-4" />Report issue</Button></DialogTrigger><DialogContent className="max-h-[90vh] overflow-y-auto rounded-[24px] border-[#E1E5DB] bg-white p-0 sm:max-w-xl"><DialogHeader className="border-b border-[#E9EDE4] bg-[#FFF0A8] p-6"><p className="eyebrow text-[#617067]">Structured intake</p><DialogTitle className="display-heading mt-2 text-3xl">Report a real signal.</DialogTitle></DialogHeader><form onSubmit={submit} className="space-y-4 p-6"><div className="space-y-2"><Label htmlFor="issueTitle">What broke?</Label><Input id="issueTitle" value={title} onChange={event => setTitle(event.target.value)} placeholder="A clear, observable problem" required /></div><div className="space-y-2"><Label htmlFor="issueDescription">Context</Label><Textarea id="issueDescription" value={description} onChange={event => setDescription(event.target.value)} placeholder="Impact, actual behavior, and useful triage context." className="min-h-28" /></div><div className="space-y-2"><Label htmlFor="issueSteps">Reproducible steps</Label><Textarea id="issueSteps" value={steps} onChange={event => setSteps(event.target.value)} placeholder={"1. Go to…\n2. Click…\n3. Observe…"} className="min-h-24" /></div>{create.error && <p className="rounded-xl bg-[#FFF1EF] p-3 text-xs font-medium text-[#B8423A]">{create.error.message}</p>}<Button disabled={create.isPending} className="h-11 w-full rounded-xl bg-[#18342C] text-white hover:bg-[#264B40]">{create.isPending ? "Creating report…" : "Create issue"}</Button></form></DialogContent></Dialog>; }
+function NewIssueDialog({
+  projectId,
+  onCreated,
+}: {
+  projectId: number;
+  onCreated: (id: number) => void;
+}) {
+  const utils = trpc.useUtils();
+  const create = trpc.issues.create.useMutation({
+    onSuccess: result => {
+      utils.issues.list.invalidate();
+      utils.project.overview.invalidate();
+      onCreated(result.issueId);
+    },
+  });
+
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [debouncedTitle, setDebouncedTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [steps, setSteps] = useState("");
+
+  // Debounce title input for live duplicate detection
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedTitle(title.trim());
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [title]);
+
+  const similarQuery = trpc.issues.findSimilar.useQuery(
+    { projectId, title: debouncedTitle },
+    {
+      enabled: open && debouncedTitle.length >= 3,
+      staleTime: 5000,
+    }
+  );
+
+  const duplicates = similarQuery.data?.duplicates ?? [];
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    await create.mutateAsync({
+      projectId,
+      title,
+      description,
+      reproducibleSteps: steps,
+    });
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="rounded-xl bg-[#FF7164] font-semibold text-[#19352D] shadow-[0_8px_18px_rgba(255,113,100,.24)] hover:bg-[#FF8A7E]">
+          <Plus className="mr-2 h-4 w-4" />
+          Report issue
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] overflow-y-auto rounded-[24px] border-[#E1E5DB] bg-white p-0 sm:max-w-xl">
+        <DialogHeader className="border-b border-[#E9EDE4] bg-[#FFF0A8] p-6">
+          <p className="eyebrow text-[#617067]">Structured intake</p>
+          <DialogTitle className="display-heading mt-2 text-3xl">
+            Report a real signal.
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={submit} className="space-y-4 p-6">
+          <div className="space-y-2">
+            <Label htmlFor="issueTitle">What broke?</Label>
+            <Input
+              id="issueTitle"
+              value={title}
+              onChange={event => setTitle(event.target.value)}
+              placeholder="A clear, observable problem"
+              required
+            />
+          </div>
+
+          {/* Proactive Real-Time Duplicate Advisory */}
+          {duplicates.length > 0 && (
+            <div className="rounded-xl border border-[#F0C068]/70 bg-[#FFFDF5] p-3 text-xs space-y-2 shadow-xs">
+              <div className="flex items-center gap-1.5 font-bold text-[#A6781E]">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>
+                  Proactive Duplicate Guard: {duplicates.length} similar issue(s) found
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                {duplicates.map(d => (
+                  <div
+                    key={d.id}
+                    className="flex items-center justify-between rounded-lg bg-white p-2 border border-[#E8EAE3] text-[#18342C]"
+                  >
+                    <span className="font-medium text-xs truncate max-w-[280px]">
+                      #{d.number} {d.title}
+                    </span>
+                    <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F0C068]/20 text-[#A6781E]">
+                      {d.similarityScore}% match
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-[#718079]">
+                Review the existing records above to prevent redundant defect tickets.
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="issueDescription">Context</Label>
+            <Textarea
+              id="issueDescription"
+              value={description}
+              onChange={event => setDescription(event.target.value)}
+              placeholder="Impact, actual behavior, and useful triage context."
+              className="min-h-28"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="issueSteps">Reproducible steps</Label>
+            <Textarea
+              id="issueSteps"
+              value={steps}
+              onChange={event => setSteps(event.target.value)}
+              placeholder={"1. Go to…\n2. Click…\n3. Observe…"}
+              className="min-h-24"
+            />
+          </div>
+          {create.error && (
+            <p className="rounded-xl bg-[#FFF1EF] p-3 text-xs font-medium text-[#B8423A]">
+              {create.error.message}
+            </p>
+          )}
+          <Button
+            disabled={create.isPending}
+            className="h-11 w-full rounded-xl bg-[#18342C] text-white hover:bg-[#264B40]"
+          >
+            {create.isPending ? "Creating report…" : "Create issue"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function CleanExplorerEmpty() { return <div className="mx-auto max-w-6xl space-y-5"><section className="relative overflow-hidden rounded-[30px] bg-[#FFF0A8] p-9 md:p-11"><span className="absolute right-8 top-9 h-20 w-20 rounded-full bg-[#FF7164]" /><span className="absolute bottom-8 right-[26%] h-14 w-14 rounded-[18px] bg-[#A8E6CF]" /><div className="relative max-w-2xl"><p className="eyebrow text-[#617067]">Issue explorer</p><h1 className="display-heading mt-4 text-5xl leading-[.92]">Find the work that needs a <span className="italic text-[#FF7164]">little love.</span></h1><p className="mt-5 max-w-xl text-sm leading-7 text-[#617067]">Once you create a workspace, search, filters, and clean decision trails are all right here.</p></div></section><section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">{[["01", "Capture", "A good report makes everything easier.", "bg-[#FFD8D2]"], ["02", "Triage", "Give each signal its next direction.", "bg-[#FFF0A8]"], ["03", "Discover", "Find the exact work in a few keystrokes.", "bg-[#DCCEFF]"], ["04", "Resolve", "Leave behind a helpful trail.", "bg-[#A8E6CF]"]].map(([number, title, text, color]) => <article key={title} className={`play-card rounded-[24px] border border-[#E1E5DB] p-6 ${color}`}><p className="font-mono text-xs text-[#718079]">{number}</p><h2 className="display-heading mt-10 text-3xl">{title}</h2><p className="mt-3 text-sm leading-6 text-[#617067]">{text}</p></article>)}</section></div>; }
 function ListLoading() { return <div className="space-y-3 p-5">{Array.from({ length: 6 }).map((_, index) => <div className="h-14 rounded-xl bg-[#F1F2EA]" key={index} />)}</div>; }
