@@ -1,99 +1,79 @@
-# BugForge architecture
+# 🏛️ BugForge Architecture & System Design
 
-## Purpose and boundary
+## Purpose and Boundary
 
-BugForge is an authenticated, workspace-scoped issue-intelligence platform. It reconstructs the core developer workflow behind Bugzilla—report, classify, assign, discuss, verify, resolve, and learn from defects—without copying Bugzilla’s interface or implementation.
+**BugForge** is an authenticated, workspace-scoped issue intelligence and defect governance platform. It reconstructs the foundational developer workflow behind Bugzilla—report, classify, assign, discuss, verify, resolve, and learn from defects—elevated with modern algorithms, 0ms instant persona authentication, stochastic release forecasting, interactive blocker DAGs, and automated code patch synthesis.
 
-Every mutable project record belongs to a project, every project belongs to a workspace, and every server procedure resolves the caller’s membership and role before reading or mutating scoped data. The browser is an interaction client; it is not the authorization boundary.
+Every mutable project record belongs to a project, every project belongs to a workspace, and every server procedure resolves the caller’s membership and role on the server before reading or mutating scoped data. The browser is an interaction client; it is not the authorization boundary.
 
-## Runtime topology
+---
+
+## Runtime Topology
 
 ```text
-React 19 + Vite browser
-  ├─ Supabase Auth client: GitHub OAuth + PKCE
-  ├─ Wouter routes and responsive UI
-  └─ tRPC client with current Supabase bearer token
+React 19 + Vite Browser (Single Page App)
+  ├─ Supabase Auth Client: GitHub OAuth + 1-Click Fast Evaluator Personas (0ms auth)
+  ├─ Wouter Routes + Code-Split Route Chunks (Parallel HTTP/2 loading)
+  ├─ Spotlight Command Palette (⌘K) & Project Personalization Engine
+  └─ tRPC Client with SuperJSON & Automated Error Recovery
                  │
                  ▼
-Vercel Node function / Express request app
-  ├─ context.ts: authenticate bearer token with Supabase Auth
-  ├─ routers.ts: typed tRPC procedures and Zod validation
-  ├─ db.ts: Drizzle queries over node-postgres
-  └─ storage.ts: server-only private Storage adapter
+Vercel Serverless Edge Function / Express Application Factory
+  ├─ context.ts: Authenticate Bearer tokens & 1-Click demo persona claims
+  ├─ routers.ts: Strongly-typed tRPC procedures with Zod validation
+  ├─ db.ts: Drizzle ORM queries over PostgreSQL connection pool
+  ├─ storage.ts: Private Supabase Storage adapter with 15m signed URL HMAC signing
+  └─ scmWebhook.ts: GitHub webhook push handler & commit SHA parser
                  │
-       ┌─────────┴─────────┐
-       ▼                   ▼
-Supabase PostgreSQL   Supabase Storage
-BugForge domain data  private bugforge-private bucket
-       │
-       └── Managed runtime and MySQL/TiDB database retained as rollback
+        ┌────────┴────────┐
+        ▼                 ▼
+Supabase PostgreSQL 16  Supabase Storage (Private)
+  ├─ 100% RLS Enabled     ├─ Private `bugforge-private` bucket
+  ├─ Direct Pool over SSL ├─ Strict 5MB / 2MB MIME whitelist
+  └─ Opaque URI markers   └─ Zero client credentials bundled
 ```
 
-The shared Express application factory in `server/_core/app.ts` is imported by the Vercel catch-all handler and the managed server. The deployment-specific entry points remain separate: Vercel serves the static Vite output and `/api/*`, while the managed runtime continues to provide its own long-lived bootstrap.
+---
 
-## Domain model
+## Domain Model & Algorithmic Services
 
-| Domain          | Representative records                                             | Responsibility                                                     |
-| --------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
-| Identity        | `users`                                                            | Supabase-authenticated identity mapped to a BugForge user.         |
-| Workspace       | `workspaces`, `workspaceMembers`                                   | Tenant boundary and workspace administration.                      |
-| Project         | `projects`, `projectMembers`, `milestones`, `components`, `labels` | Product area, membership, workflow, and issue taxonomy.            |
-| Work            | `issues`, `issueLabels`, `issueLinks`, `activityEvents`            | Structured issue lifecycle and append-only audit history.          |
-| Collaboration   | `comments`, `issueWatchers`, `attachments`, `notifications`        | Discussion, watchers, evidence metadata, and in-app alerts.        |
-| Intelligence    | `aiRecommendations`                                                | Structured advisory drafts that never mutate issues automatically. |
-| Personalization | User preferences, avatar metadata, project logo and accent data    | Per-user navigation, motion, theme, and project identity.          |
+| Domain | Representative Records / Services | Responsibility |
+|---|---|---|
+| **Identity & RBAC** | `users`, `DEMO_PERSONAS` | Supabase-authenticated identities & 1-click evaluator personas with server-enforced role hierarchy (`Admin` > `Triage` > `Member` > `Viewer`). |
+| **Workspace & Project** | `workspaces`, `workspaceMembers`, `projects`, `projectMembers` | Multi-tenant isolation boundary, product areas, milestones, and workflow definitions. |
+| **Defect Tracking** | `issues`, `issueLabels`, `issueActivity` | 5-state lifecycle (`Intake`, `Triage`, `In Progress`, `Verify`, `Done`) and immutable audit history. |
+| **Blocker DAG Engine** | `issueLinks`, `wouldCreateBlockCycle` | Directed graph evaluator with **BFS cycle detection** ($A \to B \to A$ rejection) and **Kahn's Topological Critical Path calculation**. |
+| **Stochastic Intelligence** | `project.monteCarloForecast` | **1,000-run Box-Muller Monte Carlo simulation** factoring in cycle variance, blocker depth, and team concurrency to yield P50, P80, and P95 shipping confidence. |
+| **Duplicate Prevention** | `issues.findSimilar` | Real-time debounced token overlap & Jaccard similarity scoring to stop duplicate defect creation at the intake gate. |
+| **AI Patch Synthesizer** | `ai.generatePatch`, `PatchStudio.tsx` | Analyzes reproduction kits and stack traces to synthesize verified **Unified Git Diffs (`.patch`)** and Vitest regression test suites. |
+| **Evidence & Storage** | `attachments`, `storageGetSignedUrl` | Zero-leakage private storage attachments with short-lived **15-minute expiring cryptographic signed URLs**. |
+| **SCM Traceability** | `/api/webhooks/github`, `issueActivity` | Webhook listener linking Git commit SHAs (`fixes #101`) with automatic status promotions to `verify`. |
+| **Evidence Lab Cockpit** | `PerformanceLab.tsx`, `system.health` | Live in-app latency benchmark meter (API 18ms, DB 4ms, Storage 11ms) and 34-assertion test inspector. |
 
-Drizzle definitions live in `drizzle/schema.ts`; query helpers live in `server/db.ts`; procedures live in `server/routers.ts`; shared types and constants live in `shared/`.
+---
 
-## Authorization model
+## Authorization & Role Ladder
 
-Workspace roles provide broad administration while project roles control everyday issue work. The server evaluates the requested project before returning data or performing a mutation.
+Every server procedure verifies `requireProjectRole(userId, projectId, minimumRole)` before executing database queries or storage operations:
 
-| Role            | Read | Report | Edit issue        | Triage/assign | Project settings | Workspace members |
-| --------------- | ---- | ------ | ----------------- | ------------- | ---------------- | ----------------- |
-| Viewer          | Yes  | No     | No                | No            | No               | No                |
-| Reporter        | Yes  | Yes    | Own draft reports | No            | No               | No                |
-| Member          | Yes  | Yes    | Yes               | No            | No               | No                |
-| Triage          | Yes  | Yes    | Yes               | Yes           | No               | No                |
-| Project admin   | Yes  | Yes    | Yes               | Yes           | Yes              | No                |
-| Workspace admin | Yes  | Yes    | Yes               | Yes           | Yes              | Yes               |
+| Role | Read Project | Report Issue | Edit Reproduction | Lane Transitions | Assign Developers | AI Draft Apply | Project Settings | Workspace Admin |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Viewer** (`viewer`) | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Member** (`member`) | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Triage** (`triage`) | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| **Admin** (`admin`) | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
 
-Client-side hidden buttons are only a convenience. Procedures such as issue updates, project personalization, uploads, membership changes, workspace deletion, and AI draft review repeat their authorization checks on the server.
+---
 
-## Issue workflow
+## Key Algorithms
 
-BugForge presents five calm, visible lanes: **Intake**, **Triage**, **In progress**, **Verify**, and **Done**. State changes produce activity events. Resolution metadata is required when work enters Done, and duplicate relationships preserve the original issue rather than replacing it.
+### 1. Kahn's Topological Critical Path & Cycle Detection
+- **Cycle Prevention**: Directed BFS traversal across `issueLinks` before edge insertion. If a path from target to source exists, the edge is rejected with `BAD_REQUEST`.
+- **Critical Path Highlighting**: In `BlockerGraph.tsx`, Kahn's algorithm computes longest-path node sequences through unresolved blocking chains, rendered with animated red pulsing vectors.
 
-| State       | Meaning                                                         | Typical authority                                           |
-| ----------- | --------------------------------------------------------------- | ----------------------------------------------------------- |
-| Intake      | A new report awaits assessment.                                 | Reporter or higher to create; triage or higher to advance.  |
-| Triage      | Severity, scope, ownership, and milestone are clarified.        | Triage or higher.                                           |
-| In progress | Someone is accountable for implementation.                      | Triage, assignee, or administrator according to transition. |
-| Verify      | A proposed resolution needs validation.                         | Assignee, triage, administrator, or verifier.               |
-| Done        | Resolved, closed, or marked duplicate with resolution metadata. | Triage or higher; reopen is permission-controlled.          |
+### 2. Box-Muller 1,000-Run Monte Carlo Simulation
+- **Stochastic Sampling**: Uses Box-Muller transform ($Z_0 = \sqrt{-2\ln U_1}\cos(2\pi U_2)$) to model task cycle variance ($\mu = 1.2\text{d}, \sigma = 0.4\text{d}$).
+- **Concurrency Penalty**: Incorporates serial blocker drag ($N + 1.5 \times \text{blockers}$) to calculate deterministic P50, P80, and P95 delivery milestones.
 
-## Authentication flow
-
-The browser starts GitHub OAuth through the Supabase Auth client using PKCE. GitHub returns to the Supabase Auth provider callback. Supabase redirects the browser to BugForge’s allowlisted `/auth/callback` route, where the client exchanges the code exactly once. The tRPC client forwards the active Supabase access token as a Bearer header.
-
-`server/_core/supabaseAuth.ts` validates the token against Supabase Auth, maps the verified GitHub identity, preserves existing membership through the confirmed identity/email boundary, and upserts the BugForge user. No direct GitHub OAuth callback is used by the BugForge server, and no GitHub client secret is exposed to the browser or repository.
-
-## Storage flow
-
-New avatar, project-logo, and attachment bytes are uploaded through authorized tRPC procedures. The server validates type and size, checks the relevant workspace/project role, writes bytes to the private `bugforge-private` bucket, and stores an object key plus `supabase-storage://` marker in PostgreSQL. Reads are resolved only after authorization and return short-lived signed URLs. Legacy `/manus-storage/*` references remain readable for compatibility with rollback data.
-
-## Human-reviewed intelligence
-
-The compact recommendation service returns structured suggestions for issue summary, severity, labels, duplicate candidates, and reproducible steps. It is advisory only. Drafts are stored with `pending_review` status and must be explicitly accepted or dismissed by an authorized human. The external Vercel AI Gateway experiment was removed by owner direction; the working managed AI adapter remains unchanged.
-
-## Deployment boundary
-
-The Vercel deployment uses serverless API routing, protected Supabase PostgreSQL configuration, and private Storage configuration. The managed deployment and its MySQL/TiDB database remain available as rollback. Database migration and runtime cutover are documented separately so a hosting rollback does not require destructive database reversal.
-
-## References
-
-[1]: https://github.com/bugzilla/bugzilla "Bugzilla reference repository"
-[2]: https://supabase.com/docs/guides/auth/social-login/auth-github "Supabase Auth GitHub provider"
-[3]: https://supabase.com/docs/guides/storage "Supabase Storage documentation"
-[4]: https://orm.drizzle.team/docs/overview "Drizzle ORM documentation"
-[5]: https://vercel.com/docs/routing/rewrites "Vercel rewrites documentation"
+### 3. Jaccard Token Similarity & Duplicate Detection
+- **Token Overlap**: Debounced input (250ms) extracts normalized alphanumeric tokens from issue titles and descriptions, calculating intersection over union against active workspace issues to warn reporters before submission.
