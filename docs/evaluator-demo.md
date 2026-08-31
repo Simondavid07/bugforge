@@ -11,10 +11,10 @@ Judges can evaluate BugForge immediately on the live production deployment:
 | Method | Target Link / Trigger | Description |
 |---|---|---|
 | **🚀 100-Issue Sandbox** | [**`bugforge-lyart.vercel.app`**](https://bugforge-lyart.vercel.app) ➔ Click **`Launch Live Sandbox ➔`** | Instantly seeds a 100-defect enterprise dataset across all 5 lanes with blocker DAGs |
-| **👑 Carol (Admin)** | Click **`Carol Danvers (Admin)`** on Login | Full platform governance: project accent customization, workspace deletion, role management |
-| **🎯 Eve (Triage)** | Click **`Eve Adams (Triage)`** on Login | Workflow lead: lane moves, developer assignees, AI triage draft reviews, release blockers |
-| **💻 Alice (Dev)** | Click **`Alice Smith (Dev)`** on Login | Core engineer: issue reproduction kits, AI Git Diff patch synthesis, comments, attachments |
-| **👁️ Bob (Viewer)** | Click **`Bob Jones (Viewer)`** on Login | Read-only reporter: creates new defects; demonstrates server HTTP 403 rejection on restricted mutations |
+| **👑 Marcus (Admin)** | Click **`Marcus Vance (Platform Principal)`** on Login | Full platform governance: project accent customization, workspace deletion, role management |
+| **🎯 Elena (Triage)** | Click **`Elena Rostova (Triage Director)`** on Login | Workflow lead: lane moves, developer assignees, AI triage draft reviews, release blockers |
+| **🛠️ Devon (Staff Dev)** | Click **`Devon Wright (Staff Engineer)`** on Login | Core engineer: issue reproduction kits, AI Git Diff patch synthesis, comments, attachments |
+| **🔭 Sophia (Auditor)** | Click **`Sophia Chen (Release Auditor)`** on Login | Read-only reporter: creates new defects; demonstrates server HTTP 403 rejection on restricted mutations |
 | **🎲 In-App Re-Seed** | Click **`100-Issue Demo`** in Header | One-click button in the header bar to top up or re-populate 100 enterprise issues |
 
 ---

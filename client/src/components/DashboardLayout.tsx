@@ -80,17 +80,17 @@ function SignInGate() {
   const personas = [
     {
       key: "admin",
-      name: "Carol Danvers",
-      role: "Admin Lead",
-      badge: "👑 Full Access",
-      desc: "Workspace deletion, accent color settings, member governance",
+      name: "Marcus Vance",
+      role: "Platform Principal",
+      badge: "👑 Admin Lead",
+      desc: "Workspace governance, accent customization, member permission roles",
       color: "border-[#FF7164]/40 hover:border-[#FF7164] hover:bg-[#FFF5F4]",
       accent: "bg-[#FF7164]/15 text-[#D14336]",
     },
     {
       key: "triage",
-      name: "Eve Adams",
-      role: "Triage Lead",
+      name: "Elena Rostova",
+      role: "Triage Director",
       badge: "🎯 Triage & AI",
       desc: "Status moves, AI draft review & apply, release blocker toggles",
       color: "border-[#F0C068]/40 hover:border-[#F0C068] hover:bg-[#FFFDF5]",
@@ -98,18 +98,18 @@ function SignInGate() {
     },
     {
       key: "developer",
-      name: "Alice Smith",
-      role: "Core Engineer",
-      badge: "💻 Member",
-      desc: "Edit issue reproduction, threaded comments, private file evidence",
+      name: "Devon Wright",
+      role: "Staff Engineer",
+      badge: "🛠️ Core Systems",
+      desc: "Edit reproduction kits, synthesize AI code patches, file evidence",
       color: "border-[#75937E]/40 hover:border-[#75937E] hover:bg-[#F4FAF6]",
       accent: "bg-[#75937E]/20 text-[#2B5436]",
     },
     {
       key: "viewer",
-      name: "Bob Jones",
-      role: "Reporter / QA",
-      badge: "👁️ Read-Only",
+      name: "Sophia Chen",
+      role: "Release Auditor",
+      badge: "🔭 QA / Audit",
       desc: "Create reports, test server-enforced rejection on restricted actions",
       color: "border-[#839087]/30 hover:border-[#839087] hover:bg-[#F9FAF9]",
       accent: "bg-[#839087]/15 text-[#526058]",
@@ -383,19 +383,19 @@ function Shell({ children }: { children: React.ReactNode }) {
                   <span className="hidden sm:inline text-[#718079]">Role:</span>
                   <span>
                     {demoPersona === "admin"
-                      ? "👑 Carol (Admin)"
+                      ? "👑 Marcus (Admin)"
                       : demoPersona === "triage"
-                      ? "🎯 Eve (Triage)"
+                      ? "🎯 Elena (Triage)"
                       : demoPersona === "viewer"
-                      ? "👁️ Bob (Viewer)"
+                      ? "🔭 Sophia (Auditor)"
                       : demoPersona === "developer"
-                      ? "💻 Alice (Dev)"
+                      ? "🛠️ Devon (Staff Dev)"
                       : user?.name ?? "Demo User"}
                   </span>
                   <ChevronDown className="h-3 w-3 text-[#8A978F]" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60 rounded-xl p-1.5 shadow-xl bg-white border border-[#E8EAE3]">
+              <DropdownMenuContent align="end" className="w-64 rounded-xl p-1.5 shadow-xl bg-white border border-[#E8EAE3]">
                 <DropdownMenuLabel className="text-[10px] uppercase tracking-wider font-bold text-[#8A978F] px-2 py-1">
                   ⚡ Fast Evaluator Switcher
                 </DropdownMenuLabel>
@@ -404,25 +404,25 @@ function Shell({ children }: { children: React.ReactNode }) {
                   onClick={() => void loginAsPersona("admin")}
                   className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#FFF5F4] focus:bg-[#FFF5F4]"
                 >
-                  👑 Carol Danvers (Admin)
+                  👑 Marcus Vance (Platform Principal)
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => void loginAsPersona("triage")}
                   className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#FFFDF5] focus:bg-[#FFFDF5]"
                 >
-                  🎯 Eve Adams (Triage Lead)
+                  🎯 Elena Rostova (Triage Director)
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => void loginAsPersona("developer")}
                   className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#F4FAF6] focus:bg-[#F4FAF6]"
                 >
-                  💻 Alice Smith (Core Dev)
+                  🛠️ Devon Wright (Staff Engineer)
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => void loginAsPersona("viewer")}
                   className="cursor-pointer rounded-lg px-2 py-1.5 text-xs font-medium hover:bg-[#F9FAF9] focus:bg-[#F9FAF9]"
                 >
-                  👁️ Bob Jones (Viewer / QA)
+                  🔭 Sophia Chen (Release Auditor)
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

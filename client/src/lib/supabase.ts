@@ -41,7 +41,7 @@ export function getActiveDemoPersona(): string | null {
   const stored = localStorage.getItem(DEMO_PERSONA_STORAGE_KEY);
   if (stored === "none") return null;
   if (stored && stored.startsWith("demo:")) return stored.slice(5);
-  // Default to instant Carol (Admin) demo persona
+  // Default to instant Marcus Vance (Admin) demo persona
   return "admin";
 }
 

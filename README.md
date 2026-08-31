@@ -98,12 +98,12 @@ The login screen and in-app header bar feature **1-Click Fast Persona Switching*
 
 | Persona | Role | Key Capabilities & Permission Boundary |
 |---|---|---|
-| 👑 **Carol Danvers** *(Admin Lead)* | `admin` | **Full Platform Governance**: Workspace deletion, project accent customization, member role assignments |
-| 🎯 **Eve Adams** *(Triage Lead)* | `triage` | **Workflow & AI Lead**: Move issues between all 5 states, assign developers, review & apply AI drafts, toggle release blockers |
-| 💻 **Alice Smith** *(Core Dev)* | `member` | **Platform Engineer**: Edit issue reproduction kits, synthesize AI code patches, post threaded comments, attach private file evidence, link dependencies |
-| 👁️ **Bob Jones** *(Reporter / QA)* | `viewer` | **External Reporter / QA**: Create new issues, read project state; **demonstrates server-side HTTP 403 rejection** when attempting restricted mutations |
+| 👑 **Marcus Vance** *(Platform Principal)* | `admin` | **Full Platform Governance**: Workspace deletion, project accent customization, member role assignments |
+| 🎯 **Elena Rostova** *(Triage Director)* | `triage` | **Workflow & AI Lead**: Move issues between all 5 states, assign developers, review & apply AI drafts, toggle release blockers |
+| 🛠️ **Devon Wright** *(Staff Systems Engineer)* | `member` | **Platform Engineer**: Edit issue reproduction kits, synthesize AI code patches, post threaded comments, attach private file evidence, link dependencies |
+| 🔭 **Sophia Chen** *(Release Auditor / QA)* | `viewer` | **Release Auditor / QA**: Create new issues, read project state; **demonstrates server-side HTTP 403 rejection** when attempting restricted mutations |
 
-> **Live RBAC Testing**: While logged in, click the **`Role: [Carol (Admin) ▼]`** dropdown in the header to switch between roles on the fly and see UI permissions and server validation update in real time!
+> **Live RBAC Testing**: While logged in, click the **`Role: [Marcus (Admin) ▼]`** dropdown in the header to switch between roles on the fly and see UI permissions and server validation update in real time!
 
 ---
 
@@ -113,7 +113,7 @@ Follow this 2-minute walkthrough on the live demo to experience BugForge's full 
 
 ```mermaid
 flowchart LR
-  A[1. 1-Click Login as Eve] --> B[2. Open Overview Pulse]
+  A[1. 1-Click Login as Elena] --> B[2. Open Overview Pulse]
   B --> C[3. Triage Issue WEB-101]
   C --> D[4. View Blocker DAG]
   D --> E[5. Synthesize AI Code Patch]

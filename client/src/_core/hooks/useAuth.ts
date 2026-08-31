@@ -14,26 +14,26 @@ const PERSONA_PROFILES: Record<
 > = {
   admin: {
     id: 1,
-    name: "Carol Danvers (Admin)",
-    email: "admin@bugforge.demo",
+    name: "Marcus Vance (Platform Principal)",
+    email: "marcus.vance@bugforge.io",
     role: "admin",
   },
   triage: {
     id: 2,
-    name: "Eve Adams (Triage)",
-    email: "triage@bugforge.demo",
+    name: "Elena Rostova (Triage Director)",
+    email: "elena.rostova@bugforge.io",
     role: "user",
   },
   developer: {
     id: 3,
-    name: "Alice Smith (Dev)",
-    email: "dev@bugforge.demo",
+    name: "Devon Wright (Staff Engineer)",
+    email: "devon.wright@bugforge.io",
     role: "user",
   },
   viewer: {
     id: 4,
-    name: "Bob Jones (Viewer)",
-    email: "viewer@bugforge.demo",
+    name: "Sophia Chen (Release Auditor)",
+    email: "sophia.chen@bugforge.io",
     role: "user",
   },
 };
